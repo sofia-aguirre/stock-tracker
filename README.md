@@ -29,7 +29,17 @@ app.js boilerplate
 server.js boilerplate (with landing page html endpoint)
 
 6).
-added layout style for stockTracker.html
+stockTracker.html added layout style
+
+7).
+app.js add landing page buttons function show signup/login form
+
+8).
+app.js add tracker page button function add new trade log as array
+
+9).
+app.js refactor tracker page button function add new trade log as a function
+
 
 extra
 toggle button for buy/sell
