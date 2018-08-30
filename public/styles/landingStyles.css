@@ -1,0 +1,49 @@
+body {
+    background-image: url("/images/stocks_background.jpeg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+header {
+    margin-top: 10vh;
+    background-color: #254d208e;
+}
+
+h1, h2, .instructions {
+    text-align: center;
+}
+
+#btn-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+#signup-button {
+    margin-right: 16px;
+}
+
+#card-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 10%;
+}
+
+.instructions {
+    background-color: #254d208e;
+    margin: 16px;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
