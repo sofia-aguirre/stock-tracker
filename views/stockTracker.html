@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Stock Tracker Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="./css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="../public/styles/normalize.css" />
 
     <link rel="stylesheet" type="text/css" media="screen" href="../public/styles/stockTrackerStyles.css" />
     <script src="main.js defer"></script>
@@ -18,14 +18,14 @@
             <img src="https://via.placeholder.com/100x100" alt="user_image">
             <button>log out</button>
         </div>
-        <form id="tradeForm">
+        <form id="tradeForm" action="">
             <input type="text" name="symbol" placeholder="stock symbol">
             <input type="text" name="share" placeholder="quantity of share">
             <input type="text" name="date" placeholder="trade date mm-dd-yyyy">
-            <input type="radio" id="buy" name="buy" value="buy" checked="checked">
-            <label>buy</label>
-            <input type="radio" id="sell" name="sell" value="sell">
-            <label>sell</label>
+            <input type="radio" id="buy" name="buyOrSell" value="buy" checked="checked">
+            buy<br>
+            <input type="radio" id="sell" name="buyOrSell" value="sell">
+            sell<br>
             <button type="submit">Add to log</button>
         </form>
         <div id="portfolioDiv">
