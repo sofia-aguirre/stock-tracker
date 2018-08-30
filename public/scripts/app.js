@@ -3,6 +3,8 @@ console.log("Sanity Check: JS is working!");
 $(document).ready(function(){
 
 
+
+
 ///////LANDING BUTTONS////////
 // shows the signup form when either buttons are clicked
 $('#signup-button').on('click', function(event) {
