@@ -8,6 +8,7 @@
 
     <!-- STYLESHEETS -->
     <!-- <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" type="text/css" href="/styles/normalize.css">
     <link rel="stylesheet" href="/styles/landingStyles.css">
 
     <!-- VENDOR SCRIPTS -->
@@ -18,7 +19,28 @@
 </head>
 <!-- BEGIN HTML BODY -->
 <body>
-
+    <header>
+        <h1>Stock Tracker</h1>
+        <h2>Track your trades!</h2>
+    </header>
+    <div id="btn-wrapper">
+        <button class="btn" id="signup-button" type="button">Sign Up</button>
+        <button class="btn" id="login-button" type="button">Log In</button>
+    </div>
+    <div id="card-wrapper">
+        <div class="instructions" id="card1">
+            <p>1. Input a stock symbol.</p>
+        </div>
+        <div class="instructions" id="card2">
+            <p>2. Add how many shares you traded (bought/sold).</p>
+        </div>
+        <div class="instructions" id="card3">
+            <p>3. Specify the date of the trade.</p>
+        </div>
+        <div class="instructions" id="card4">
+            <p>4. Submit! And see your transaction added to your trade log.</p>
+        </div>
+    </div>
 </body>
 <!-- END HTML BODY -->
 </html>
