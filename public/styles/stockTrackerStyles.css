@@ -1,31 +1,36 @@
+/* only use during deelopment to see things better, delete it in production */
 body, header, main, nav, section, footer, div, article, p, h1, h2, h3{
-    border: .1em solid black;
+    border: .1rem solid black;
     box-sizing: border-box;
 }
-
+/* has main top half and section bottom half */
 body{
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
-    grid-gap: 10px;
-    padding: 10px;
+    grid-gap: 1rem;
+    padding: 1rem;
+    margin: auto;
 }
+    /* has userDiv left, tradeForm middle, portfolioDiv right */
     main{
-        width: 100%;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
     }
+        /* has user image and a log out button */
         #userDiv{
             flex: 1;
             display: flex;
             flex-direction: column;
         }
+        /* has a form */
         #tradeForm{
             flex: 3;
             display: flex;
             flex-direction: column;
         }
+        /* has 2 paragraph to display some result */
         #portfolioDiv{
             flex: 1;
         }
