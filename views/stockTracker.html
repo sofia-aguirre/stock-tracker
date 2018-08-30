@@ -2,33 +2,47 @@
 <html>
 
 <head>
-   <meta charset="utf-8" />
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <title>Stock Tracker Page</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   <link rel="stylesheet" type="text/css" href="./css/normalize.css" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Stock Tracker Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="./css/normalize.css" />
 
-   <link rel="stylesheet" type="text/css" media="screen" href="../public/styles/stockTrackerStyles.css" />
-   <script src="main.js defer"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="../public/styles/stockTrackerStyles.css" />
+    <script src="main.js defer"></script>
 </head>
 
 <body>
-   <min>
-       <div>
-           <img src="https://via.placeholder.com/200x200" alt="user_image">
-           <button>log out</button>
-       </div>
-       <div>
-           <form id="tradeInfoForm">
-               <input type="text" name="symbol" placeholder="stock symbol">
-               <input type="text" name="share" placeholder="quantity of share">
-               <input type="text" name="date" placeholder="trade date mm-dd-yyyy">
-           </form>
-       </div>
-   </min>
-   <section>
-
-   </section>
+    <main>
+        <div id="userDiv">
+            <img src="https://via.placeholder.com/100x100" alt="user_image">
+            <button>log out</button>
+        </div>
+        <form id="tradeForm">
+            <input type="text" name="symbol" placeholder="stock symbol">
+            <input type="text" name="share" placeholder="quantity of share">
+            <input type="text" name="date" placeholder="trade date mm-dd-yyyy">
+            <input type="radio" id="buy" name="buy" value="buy" checked="checked">
+            <label>buy</label>
+            <input type="radio" id="sell" name="sell" value="sell">
+            <label>sell</label>
+            <button type="submit">Add to log</button>
+        </form>
+        <div id="portfolioDiv">
+            <h5>Portfolio</h5>
+            <h6>Total Cost</h6>
+            <p>$0</p>
+            <h6>Total Sold</h6>
+            <p>$0</p>
+        </div>
+    </main>
+    <section>
+        <h5>List of trade histories</h5>
+        <h6>stock	+/-	#share	date		total</h6>
+        <p>IBM	    +	10	    8-28-2018	$1469.5</p>
+        <p>AAPL	    -	10	    8-27-2018	$2172.1</p>
+        <p>IBM	    +	5	    8-24-2018	$727.3</p>
+    </section>
 </body>
 
 </html>
