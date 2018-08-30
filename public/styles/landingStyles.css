@@ -47,3 +47,7 @@ h1, h2, .instructions {
     justify-content: center;
     align-items: center;
 }
+
+.hidden {
+    display: none;
+}
