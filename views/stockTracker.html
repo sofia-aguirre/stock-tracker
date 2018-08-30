@@ -6,10 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Stock Tracker Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- STYLESHEETS -->
     <link rel="stylesheet" type="text/css" href="../public/styles/normalize.css" />
 
+    <!-- VENDOR SCRIPTS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous" defer></script>
+
     <link rel="stylesheet" type="text/css" media="screen" href="../public/styles/stockTrackerStyles.css" />
-    <script src="main.js defer"></script>
+    <!-- APPLICATION SCRIPTS -->
+    <script src="../public/scripts/app.js" defer></script>
 </head>
 
 <body>
@@ -22,11 +27,11 @@
             <input type="text" name="symbol" placeholder="stock symbol">
             <input type="text" name="share" placeholder="quantity of share">
             <input type="text" name="date" placeholder="trade date mm-dd-yyyy">
-            <input type="radio" id="buy" name="buyOrSell" value="buy" checked="checked">
-            buy<br>
-            <input type="radio" id="sell" name="buyOrSell" value="sell">
-            sell<br>
-            <button type="submit">Add to log</button>
+            <input type="radio" id="bought" name="boughtOrSold" value="bought" checked="checked"> buy
+            <br>
+            <input type="radio" id="sold" name="boughtOrSold" value="sold"> sell
+            <br>
+            <button id="addToLog" type="submit">Add to log</button>
         </form>
         <div id="portfolioDiv">
             <h5>Portfolio</h5>
@@ -38,10 +43,12 @@
     </main>
     <section>
         <h5>List of trade histories</h5>
-        <h6>stock	+/-	#share	date		total</h6>
-        <p>IBM	    +	10	    8-28-2018	$1469.5</p>
-        <p>AAPL	    -	10	    8-27-2018	$2172.1</p>
-        <p>IBM	    +	5	    8-24-2018	$727.3</p>
+        <h6>stock +/- #share date total</h6>
+        <div id="divLog">
+            <!-- <p>IBM + 10 8-28-2018 $1469.5</p>
+            <p>AAPL - 10 8-27-2018 $2172.1</p>
+            <p>IBM + 5 8-24-2018 $727.3</p> -->
+        </div>
     </section>
 </body>
 
