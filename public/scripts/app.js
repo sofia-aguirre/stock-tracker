@@ -44,4 +44,5 @@ function addToLog(){
         $('#divLog').append(newLog);
     });
 }
+
 /////////END OF TRADE FORM BUTTONS//////////

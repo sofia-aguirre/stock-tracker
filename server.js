@@ -6,7 +6,6 @@ const app = express();
 // and populate the req.body object
 const bodyParser = require('body-parser');
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // allow cross origin requests (optional)
