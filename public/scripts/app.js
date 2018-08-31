@@ -64,6 +64,26 @@ $(document).ready(function () {
     $('#login-button').on('click', function (event) {
         event.preventDefault();
         $('#login-form-wrapper').toggleClass('hidden');
+        $('#submit-login-button').on('click', function (event) {
+            event.preventDefault();
+            var loginSerialize = $('#login-form').serializeArray();
+            var emailSerialize = loginSerialize[0].value;
+            var passwordSerialize = loginSerialize[1].value;
+            // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
+            $.ajax ({
+                method: 'POST',
+                url: '/login',
+                data: {email: emailSerialize, password: passwordSerialize},
+                success: function(json){
+                    console.log(json);
+                    localStorage.jwtToken = json.token;
+                    console.log('testing',localStorage.jwtToken);
+
+                },
+                error: function(e1, e2, e3){console.log('ERROR ', e2)},
+            });
+        });
+
     });
     ///////END OF LANDING BUTTONS//////////////////////
 

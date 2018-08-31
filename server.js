@@ -49,7 +49,6 @@ app.post('/signup', function signup(req, res) {
   var formEmail = signupForm.email;
   var formPassword = signupForm.password;
 
-
   db.User.find({ email: formEmail }, function (err, foundUser) {
     if (err) { res.json({ err }) }
     // if foundUser's length >= 1
@@ -60,27 +59,27 @@ app.post('/signup', function signup(req, res) {
       res.json({ message: 'email already exists' });
     } else {
       bcrypt.hash(req.body.password, 10, (err, hash) => {
-        if(err){ 
+        if (err) {
           console.log("hashing error:", err);
-          res.status(200).json({error: err})
-        // we now have a successful hashed password
-        }else{
+          res.status(200).json({ error: err })
+          // we now have a successful hashed password
+        } else {
           db.User.create(
-            {email: formEmail, password: hash},
-            {password: 0},
+            { email: formEmail, password: hash },
+            { password: 0 },
             function (err, createdUser) {
               createdUser = createdUser[0]
               jwt.sign(
-                {createdUser},
+                { createdUser },
                 "pokemonsecretkey",
                 (err, signedJwt) => {
-                res.status(200).json({
-                  message: 'User Created',
-                  createdUser: createdUser,
-                  signedJwt: signedJwt
-                })
-              });
-              
+                  res.status(200).json({
+                    message: 'User Created',
+                    createdUser: createdUser,
+                    signedJwt: signedJwt
+                  })
+                });
+
               // if (err) {
               //   res.json({ err });
               // }
@@ -88,10 +87,63 @@ app.post('/signup', function signup(req, res) {
             });
         }
       });
-      
+
     }
   });
-})
+});
+app.post('/login', function signup(req, res) {
+  var loginForm = req.body;
+  var formEmail = loginForm.email;
+  var formPassword = loginForm.password;
+  // need to reenable password, because we disableed password
+  db.User.find({ email: formEmail })
+    .select("+password")
+    .exec(
+      function (err, foundUser) {
+      if (err) { res.json({ err , level: "finding users"}) }
+      if (foundUser.length === 0) {
+        res.json({ message:  "Email/Password incorrect" });
+      } else {
+        console.log("PASSAWORD1: ", formPassword)
+        console.log("foundUser[0].password: ", foundUser[0].password)
+        bcrypt.compare(formPassword, foundUser[0].password, function (err, match) {
+          if (err){
+            console.log(err); 
+            return res.status(500).json({ err , level: "bcrypt compare"})
+          }
+          if (match) {
+            console.log("MATCH: ", match);
+            // create a json web token
+            const token = jwt.sign(
+              {
+                // add some identifying information
+                email: foundUser[0].email,
+                _id: foundUser[0]._id
+              },
+              // add our super secret key (which should be hidden, not plaintext like this)
+              "pokemonsecretkey",
+              // these are options, not necessary
+              {
+                // its good practice to have an expiration amount for jwt tokens.
+                expiresIn: "20s"
+              },
+            );
+            console.log("NEW TOKEN: ", token);
+            return res.status(200).json(
+              {
+                message: 'Auth successful',
+                token: token
+              }
+            )
+          }else {
+            console.log("NOT A MATCH")
+            res.status(401).json({message: "Email/Password incorrect"})
+          }
+
+      });
+    }
+  });
+});
 
 
 /**********
