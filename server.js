@@ -35,12 +35,16 @@ app.use(express.static('public'));
  * HTML Endpoints
  */
 app.get('/', function homepage(req, res) {
-    res.sendFile(__dirname + '/views/landing.html');
+    // res.sendFile(__dirname + '/views/landing.html');
+    res.sendFile(__dirname + '/views/stockTracker.html');
   });
 
 /*
  * JSON API Endpoints
  */
+// app.get('/', function(req, res){
+//   res.json();
+// });
 
 
 /**********

@@ -40,6 +40,22 @@ app.js add tracker page button function add new trade log as array
 9).
 app.js refactor tracker page button function add new trade log as a function
 
+10).
+review the web development CURD flow
+https://docs.google.com/drawings/d/12oC-gsSE5J3Mh7YE-H9qabpAbrbDdlG6AksXz_gjo5w/edit
+https://docs.google.com/drawings/d/1rclTondYQLozH8-VZWBEJfDUXLQz3VGx5ZCOQFEZ4dg/edit
+
+11).
+the 2 stock market api
+https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U
+https://api.iextrading.com/1.0/stock/aapl/chart/5y
+
+12).
+app.js, begin pair program.
+the goal here is to get form data, ajax get request stock api, filter the response json data, format the data to store in log.
+when add new trade info to log, use the form's stock symbol and date as filtering criteria for ajax request.
+ajax request from stock data for 5 to 20 years (depends on which api).
+
 
 extra
 toggle button for buy/sell

@@ -7,14 +7,16 @@
     <title>Stock Tracker Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- STYLESHEETS -->
-    <link rel="stylesheet" type="text/css" href="../public/styles/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="styles/normalize.css" />
 
     <!-- VENDOR SCRIPTS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E=" crossorigin="anonymous" defer></script>
+    <script src="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"  defer></script>
+    
 
-    <link rel="stylesheet" type="text/css" media="screen" href="../public/styles/stockTrackerStyles.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="styles/stockTrackerStyles.css" />
     <!-- APPLICATION SCRIPTS -->
-    <script src="../public/scripts/app.js" defer></script>
+    <script src="scripts/app.js" defer></script>
 </head>
 
 <body>
@@ -26,7 +28,7 @@
         <form id="tradeForm" action="">
             <input type="text" name="symbol" placeholder="stock symbol">
             <input type="text" name="share" placeholder="quantity of share">
-            <input type="text" name="date" placeholder="trade date mm-dd-yyyy">
+            <input type="text" name="date" placeholder="trade date yyyy-mm-dd">
             <input type="radio" id="bought" name="boughtOrSold" value="bought" checked="checked"> buy
             <br>
             <input type="radio" id="sold" name="boughtOrSold" value="sold"> sell
