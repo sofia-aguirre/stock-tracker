@@ -33,13 +33,13 @@ $(document).ready(function () {
     // shows the signup form when either buttons are clicked
     $('#signup-button').on('click', function (event) {
         event.preventDefault();
-        $('#form-wrapper').removeClass('hidden');
+        $('#signup-form-wrapper').toggleClass('hidden');
     });
 
     // shows the login form when either buttons are clicked
     $('#login-button').on('click', function (event) {
         event.preventDefault();
-        $('#form-wrapper').removeClass('hidden');
+        $('#login-form-wrapper').toggleClass('hidden');
     });
     ///////END OF LANDING BUTTONS//////////////////////
 
