@@ -10,6 +10,7 @@ var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
 
 $(document).ready(function () {
+
     /////////TRADE FORM BUTTONS//////////
     addToLog();
     /////////END OF TRADE FORM BUTTONS//////////
@@ -34,6 +35,21 @@ $(document).ready(function () {
     $('#signup-button').on('click', function (event) {
         event.preventDefault();
         $('#signup-form-wrapper').toggleClass('hidden');
+        // look for signup sumbit button
+        $('#submit-signup-button').on('click', function (event) {
+            event.preventDefault();
+            var signupSerialize = $('#signup-form').serializeArray();
+            var emailSerialize = signupSerialize[0].value;
+            var passwordSerialize = signupSerialize[1].value;
+            // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
+            $.ajax ({
+                method: 'POST',
+                url: '/signup',
+                data: {email: emailSerialize, password: passwordSerialize},
+                success: function(json){console.log(json)},
+                error: function(){console.log('ERROR :( SADNESS')},
+            });
+        });
     });
 
     // shows the login form when either buttons are clicked
