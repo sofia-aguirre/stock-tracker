@@ -6,7 +6,6 @@ const app = express();
 // and populate the req.body object
 const bodyParser = require('body-parser');
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // allow cross origin requests (optional)
@@ -20,6 +19,7 @@ app.use(function(req, res, next) {
 /************
  * DATABASE *
  ************/
+const db = require('./models');
 
 
 
@@ -35,16 +35,19 @@ app.use(express.static('public'));
  * HTML Endpoints
  */
 app.get('/', function homepage(req, res) {
-    // res.sendFile(__dirname + '/views/landing.html');
-    res.sendFile(__dirname + '/views/stockTracker.html');
+    res.sendFile(__dirname + '/views/landing.html');
+    // res.sendFile(__dirname + '/views/stockTracker.html');
   });
 
 /*
  * JSON API Endpoints
  */
-// app.get('/', function(req, res){
-//   res.json();
-// });
+app.post('/signup', function signup(req, res) {
+  var signupForm = req.body;
+  var formEmail = signupForm.email;
+  var formPassword = signupForm.password;
+  
+})
 
 
 /**********

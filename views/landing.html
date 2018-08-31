@@ -29,13 +29,22 @@
         <button class="btn" id="signup-button" type="button">Sign Up</button>
         <button class="btn" id="login-button" type="button">Log In</button>
     </div>
-    <div class="hidden" id="form-wrapper">
-        <form>
-            <input id="email-input" type="email" placeholder="E-mail">
-            <input id="password-input" type="password" placeholder="Password">
-            <button id="submit-button" type="submit">Submit</button>
+
+    <div class="hidden" id="signup-form-wrapper">
+        <form id="signup-form">
+            <input id="email-signup" name="email" type="email" placeholder="E-mail">
+            <input id="password-signup" name="password-signup" type="password" placeholder="Password">
+            <button id="submit-signup-button" type="submit">Submit</button>
         </form>
     </div>
+    <div class="hidden" id="login-form-wrapper">
+        <form id="login-form">
+            <input id="email-login" name="email-login" type="email" placeholder="E-mail">
+            <input id="password-login" name="password-login" type="password" placeholder="Password">
+            <button id="submit-login-button" type="submit">Submit</button>
+        </form>
+    </div>
+
     <div id="card-wrapper">
         <div class="instructions" id="card1">
             <p>1. Input a stock symbol.</p>
