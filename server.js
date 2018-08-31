@@ -1,6 +1,8 @@
 // require express and other modules
 const express = require('express');
 const app = express();
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt')
 
 // parse incoming urlencoded form data
 // and populate the req.body object
@@ -57,13 +59,36 @@ app.post('/signup', function signup(req, res) {
     if (foundUser.length >= 1) {
       res.json({ message: 'email already exists' });
     } else {
-      db.User.create({ email: formEmail, password: formPassword },
-        function (err, createdUser) {
-          if (err) {
-            res.json({ err });
-          }
-          res.json(createdUser);
-        });
+      bcrypt.hash(req.body.password, 10, (err, hash) => {
+        if(err){ 
+          console.log("hashing error:", err);
+          res.status(200).json({error: err})
+        // we now have a successful hashed password
+        }else{
+          db.User.create(
+            {email: formEmail, password: hash},
+            {password: 0},
+            function (err, createdUser) {
+              createdUser = createdUser[0]
+              jwt.sign(
+                {createdUser},
+                "pokemonsecretkey",
+                (err, signedJwt) => {
+                res.status(200).json({
+                  message: 'User Created',
+                  createdUser: createdUser,
+                  signedJwt: signedJwt
+                })
+              });
+              
+              // if (err) {
+              //   res.json({ err });
+              // }
+              // res.json(createdUser);
+            });
+        }
+      });
+      
     }
   });
 })

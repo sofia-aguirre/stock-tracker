@@ -9,8 +9,11 @@ var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
 
-$(document).ready(function () {
 
+$(document).ready(function () {
+    // delete localStorage.jwtToken;
+    console.log(localStorage.jwtToken);
+    
     /////////TRADE FORM BUTTONS//////////
     addToLog();
     /////////END OF TRADE FORM BUTTONS//////////
@@ -46,8 +49,13 @@ $(document).ready(function () {
                 method: 'POST',
                 url: '/signup',
                 data: {email: emailSerialize, password: passwordSerialize},
-                success: function(json){console.log(json)},
-                error: function(){console.log('ERROR :( SADNESS')},
+                success: function(json){
+                    console.log(json);
+                    localStorage.jwtToken = json.signedJwt;
+                    // console.log('testing',localStorage.jwtToken);
+
+                },
+                error: function(e1, e2, e3){console.log('ERROR ', e2)},
             });
         });
     });
