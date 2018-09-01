@@ -38,9 +38,17 @@ app.get('/', function homepage(req, res) {
   res.sendFile(__dirname + '/views/landing.html');
   // res.sendFile(__dirname + '/views/stockTracker.html');
 });
-app.get('/stockTracker', function homepage(req, res) {
-  res.sendFile(__dirname + '/views/stockTracker.html');
+
+// app.get('/stockTracker', function homepage(req, res) {
+//   res.sendFile(__dirname + '/views/stockTracker.html');
+// })
+
+app.post('/verify', verifyToken, (req, res) => {
+  let verified= jwt.verify(req.token, 'pokemonsecretkey')
+  console.log("verified: ", verified)
+  res.json(verified)
 });
+
 
 /*
  * JSON API Endpoints
@@ -122,7 +130,7 @@ app.post('/login', function signup(req, res) {
                 // these are options, not necessary
                 {
                   // its good practice to have an expiration amount for jwt tokens.
-                  expiresIn: "15s"
+                  expiresIn: "1m"
                 },
               );
               console.log("NEW TOKEN: ", token);
@@ -154,7 +162,7 @@ app.post('/verify', verifyToken, function (req, res) {
     } else {
       res.json({
         message: 'Post created',
-        authData: authData
+        authData: authData,
       });
     }
   });
@@ -174,6 +182,10 @@ function verifyToken(req, res, next) {
     // Set the token
     req.token = bearerToken;
     console.log('req.token', req.token);
+    ///if verified then send to stocktracker
+          app.get('/stockTracker', function homepage(req, res) {
+            res.sendFile(__dirname + '/views/stockTracker.html');
+          })
     // Next middleware
     next();
   } else {

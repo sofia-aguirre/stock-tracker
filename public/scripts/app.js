@@ -11,30 +11,32 @@ var parsedFormBoughtOrSoldData;
 var user;
 
 $(document).ready(function () {
-    if (localStorage.length > 0) {
-        // delete localStorage.jwtToken;
-        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
-        $.ajax({
-            type: "POST",
-            url: '/verify',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
-            },
-            success: function (response) {
-                console.log('login or have token', response)
-                user = { email: response.authData.email, _id: response.authData._id }
-                console.log("you can access variable user: ", user)
-                // if(window.location.pathname == '/'){
-                //     location.href = '/stockTracker';
-                // }else{
-                //     console.log('page: ', window.location.pathname);
-                // }
-            },
-            error: function (err) {
-                console.log('not login or token expired', err);
-            }
-        });
-    }
+    // if (localStorage.length > 0) {
+    //     // delete localStorage.jwtToken;
+    //     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+    //     $.ajax({
+    //         type: "POST",
+    //         url: '/verify',
+    //         beforeSend: function (xhr) {
+    //             xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+    //         },
+    //         success: function (response) {
+    //             console.log('login or have token', response)
+    //             user = { email: response.authData.email, _id: response.authData._id }
+    //             console.log("you can access variable user: ", user)
+    //             // if(window.location.pathname == '/'){
+    //             //     location.href = '/stockTracker';
+    //             // }else{
+    //             //     console.log('page: ', window.location.pathname);
+    //             // }
+    //         },
+    //         error: function (err) {
+    //             console.log('not login or token expired', err);
+    //         }
+    //     });
+    // }
+
+autoLogin();
 
     /////////TRADE FORM BUTTONS//////////
     addToLog();
@@ -99,6 +101,7 @@ $(document).ready(function () {
                     console.log(json);
                     localStorage.jwtToken = json.token;
                     console.log('testing', localStorage.jwtToken);
+
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
@@ -149,4 +152,40 @@ function getClosingByDate() {
             console.log(err);
         }
     });
+}
+
+function autoLogin () {
+if (localStorage.length > 0) {
+    // delete localStorage.jwtToken;
+    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+    $.ajax({
+        type: "POST",
+        url: '/verify',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+        },
+        success: function (response) {
+            console.log('login or have token', response)
+            // user = { email: response.authData.email, _id: response.authData._id }
+            // console.log("you can access variable user: ", user)
+            if(window.location.pathname == '/'){
+                location.href = '/stockTracker';
+            }else{
+                console.log('page: ', window.location.pathname);
+            }
+        },
+        error: function (err) {
+            console.log('not login or token expired', err);
+            if (window.performance) {
+                console.info("window.performance works fine on this browser");
+            }
+            if (performance.navigation.type == 1) {
+                console.info( "This page is reloaded" );
+                location.href = '/';
+            } else {
+                console.info( "This page is not reloaded");
+            }
+        }
+    })
+    }
 }
