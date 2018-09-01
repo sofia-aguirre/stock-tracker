@@ -8,8 +8,30 @@ var parsedFormDate;
 var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
+var user;
 
 $(document).ready(function () {
+    if (localStorage.length > 0) {
+        $.ajax({
+            type: "POST",
+            url: '/verify',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+            },
+            success: function (response) {
+                console.log('QQQQQ',response)
+                user = { email: response.email, _id: response._id }
+                console.log("you can access variable user: ", user)
+            },
+            error: function (err) {
+                console.log('WWWWWW',err);
+            }
+        });
+    }
+
+
+    // delete localStorage.jwtToken;
+    console.log(localStorage.jwtToken);
 
     /////////TRADE FORM BUTTONS//////////
     addToLog();
@@ -42,12 +64,17 @@ $(document).ready(function () {
             var emailSerialize = signupSerialize[0].value;
             var passwordSerialize = signupSerialize[1].value;
             // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
-            $.ajax ({
+            $.ajax({
                 method: 'POST',
                 url: '/signup',
-                data: {email: emailSerialize, password: passwordSerialize},
-                success: function(json){console.log(json)},
-                error: function(){console.log('ERROR :( SADNESS')},
+                data: { email: emailSerialize, password: passwordSerialize },
+                success: function (json) {
+                    console.log(json);
+                    localStorage.jwtToken = json.signedJwt;
+                    // console.log('testing',localStorage.jwtToken);
+
+                },
+                error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
         });
     });
@@ -56,6 +83,26 @@ $(document).ready(function () {
     $('#login-button').on('click', function (event) {
         event.preventDefault();
         $('#login-form-wrapper').toggleClass('hidden');
+        $('#submit-login-button').on('click', function (event) {
+            event.preventDefault();
+            var loginSerialize = $('#login-form').serializeArray();
+            var emailSerialize = loginSerialize[0].value;
+            var passwordSerialize = loginSerialize[1].value;
+            // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
+            $.ajax({
+                method: 'POST',
+                url: '/login',
+                data: { email: emailSerialize, password: passwordSerialize },
+                success: function (json) {
+                    console.log(json);
+                    localStorage.jwtToken = json.token;
+                    console.log('testing', localStorage.jwtToken);
+
+                },
+                error: function (e1, e2, e3) { console.log('ERROR ', e2) },
+            });
+        });
+
     });
     ///////END OF LANDING BUTTONS//////////////////////
 
@@ -81,7 +128,7 @@ function addToLog() {
 /////////END OF TRADE FORM BUTTONS//////////
 
 // get the closing price of the input stock symbol on the input date
-function getClosingByDate(){
+function getClosingByDate() {
     $.ajax({
         async: true,
         crossDomain: true,
@@ -91,14 +138,14 @@ function getClosingByDate(){
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        success: function(response){
+        success: function (response) {
             var price = response["Time Series (Daily)"][parsedFormDate]["4. close"];
             parsedFormTotalCost = parsedFormShare * price;
             var newLog = `<p>${parsedFormSymbol}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormBoughtOrSoldData}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormShare}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormDate}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormTotalCost}</p>`;
             logArr.push(newLog);
             $('#divLog').append(newLog);
         },
-        error: function(err){
+        error: function (err) {
             console.log(err);
         }
     });
