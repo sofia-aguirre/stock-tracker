@@ -12,6 +12,8 @@ var user;
 
 $(document).ready(function () {
     if (localStorage.length > 0) {
+        // delete localStorage.jwtToken;
+        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
         $.ajax({
             type: "POST",
             url: '/verify',
@@ -19,19 +21,20 @@ $(document).ready(function () {
                 xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
             },
             success: function (response) {
-                console.log('QQQQQ',response)
-                user = { email: response.email, _id: response._id }
+                console.log('login or have token', response)
+                user = { email: response.authData.email, _id: response.authData._id }
                 console.log("you can access variable user: ", user)
+                // if(window.location.pathname == '/'){
+                //     location.href = '/stockTracker';
+                // }else{
+                //     console.log('page: ', window.location.pathname);
+                // }
             },
             error: function (err) {
-                console.log('WWWWWW',err);
+                console.log('not login or token expired', err);
             }
         });
     }
-
-
-    // delete localStorage.jwtToken;
-    console.log(localStorage.jwtToken);
 
     /////////TRADE FORM BUTTONS//////////
     addToLog();
@@ -69,10 +72,9 @@ $(document).ready(function () {
                 url: '/signup',
                 data: { email: emailSerialize, password: passwordSerialize },
                 success: function (json) {
-                    console.log(json);
+                    console.log('signed up status',json);
                     localStorage.jwtToken = json.signedJwt;
-                    // console.log('testing',localStorage.jwtToken);
-
+                    // console.log('token for new signed up user',localStorage.jwtToken);
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
@@ -97,12 +99,10 @@ $(document).ready(function () {
                     console.log(json);
                     localStorage.jwtToken = json.token;
                     console.log('testing', localStorage.jwtToken);
-
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
         });
-
     });
     ///////END OF LANDING BUTTONS//////////////////////
 

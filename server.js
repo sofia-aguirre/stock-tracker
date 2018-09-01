@@ -23,8 +23,6 @@ app.use(function (req, res, next) {
  ************/
 const db = require('./models');
 
-
-
 /**********
  * ROUTES *
  **********/
@@ -39,6 +37,9 @@ app.use(express.static('public'));
 app.get('/', function homepage(req, res) {
   res.sendFile(__dirname + '/views/landing.html');
   // res.sendFile(__dirname + '/views/stockTracker.html');
+});
+app.get('/stockTracker', function homepage(req, res) {
+  res.sendFile(__dirname + '/views/stockTracker.html');
 });
 
 /*
@@ -78,16 +79,12 @@ app.post('/signup', function signup(req, res) {
                     createdUser: createdUser,
                     signedJwt: signedJwt
                   })
-                });
-
-              // if (err) {
-              //   res.json({ err });
-              // }
-              // res.json(createdUser);
-            });
+                }
+              );
+            }
+          );
         }
       });
-
     }
   });
 });
@@ -100,71 +97,85 @@ app.post('/login', function signup(req, res) {
     .select("+password")
     .exec(
       function (err, foundUser) {
-      if (err) { res.json({ err , level: "finding users"}) }
-      if (foundUser.length === 0) {
-        res.json({ message:  "Email/Password incorrect" });
-      } else {
-        console.log("PASSAWORD1: ", formPassword)
-        console.log("foundUser[0].password: ", foundUser[0].password)
-        bcrypt.compare(formPassword, foundUser[0].password, function (err, match) {
-          if (err){
-            console.log(err); 
-            return res.status(500).json({ err , level: "bcrypt compare"})
-          }
-          if (match) {
-            console.log("MATCH: ", match);
-            // create a json web token
-            const token = jwt.sign(
-              {
-                // add some identifying information
-                email: foundUser[0].email,
-                _id: foundUser[0]._id
-              },
-              // add our super secret key (which should be hidden, not plaintext like this)
-              "pokemonsecretkey",
-              // these are options, not necessary
-              {
-                // its good practice to have an expiration amount for jwt tokens.
-                expiresIn: "20s"
-              },
-            );
-            console.log("NEW TOKEN: ", token);
-            return res.status(200).json(
-              {
-                message: 'Auth successful',
-                token: token
-              }
-            )
-          }else {
-            console.log("NOT A MATCH")
-            res.status(401).json({message: "Email/Password incorrect"})
-          }
+        if (err) { res.json({ err, level: "finding users" }) }
+        if (foundUser.length === 0) {
+          res.json({ message: "Email/Password incorrect" });
+        } else {
+          console.log("PASSAWORD1: ", formPassword)
+          console.log("foundUser[0].password: ", foundUser[0].password)
+          bcrypt.compare(formPassword, foundUser[0].password, function (err, match) {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({ err, level: "bcrypt compare" });
+            }
+            if (match) {
+              console.log("MATCH: ", match);
+              // create a json web token
+              const token = jwt.sign(
+                {
+                  // add some identifying information
+                  email: foundUser[0].email,
+                  _id: foundUser[0]._id
+                },
+                // add our super secret key (which should be hidden, not plaintext like this)
+                "pokemonsecretkey",
+                // these are options, not necessary
+                {
+                  // its good practice to have an expiration amount for jwt tokens.
+                  expiresIn: "15s"
+                },
+              );
+              console.log("NEW TOKEN: ", token);
+              return res.status(200).json(
+                {
+                  message: 'Auth successful',
+                  token: token
+                }
+              )
+            } else {
+              console.log("NOT A MATCH")
+              res.status(401).json({ message: "Email/Password incorrect" })
+            }
+          });
+        }
+      }
+    );
+});
 
+// when requet for route /verify,
+// first use middleware to check for token store in header in the browser,
+// if no token or bad token send status 403 no access, else get the token, next,
+// this is like double verify, use jwt to verify the token
+app.post('/verify', verifyToken, function (req, res) {
+  console.log(req.token)
+  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: 'Post created',
+        authData: authData
       });
     }
   });
 });
 
-app.post('/verify', verifyToken, function(req, res) {
-
-});
 function verifyToken(req, res, next) {
   console.log("in verify...");
   // Get auth header value
   // when we send our token, we want to send it in our header
   const bearerHeader = req.headers['authorization'];
-  console.log('testing2',bearerHeader)
+  console.log('testing2', bearerHeader)
   // Check if bearer is undefined
-  if(typeof bearerHeader !== 'undefined'){
+  if (typeof bearerHeader !== 'undefined') {
     const bearer = bearerHeader.split(' ');
     // Get token from array
     const bearerToken = bearer[1];
     // Set the token
     req.token = bearerToken;
-    console.log('req.token',req.token);
+    console.log('req.token', req.token);
     // Next middleware
     next();
-
   } else {
     // Forbidden
     res.sendStatus(403);

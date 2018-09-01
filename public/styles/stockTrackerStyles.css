@@ -5,6 +5,10 @@ body, header, main, nav, section, footer, div, article, p, h1, h2, h3{
 }
 /* has main top half and section bottom half */
 body{
+    background-image: url("/images/stocks_background.jpeg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -14,6 +18,7 @@ body{
 }
     /* has userDiv left, tradeForm middle, portfolioDiv right */
     main{
+        background-color: #254d208e;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
@@ -34,7 +39,9 @@ body{
         #portfolioDiv{
             flex: 1;
         }
-
+    section{
+        background-color: #254d208e;
+    }
 button{
     background-color: darkgrey;
 }
