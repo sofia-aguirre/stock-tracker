@@ -11,142 +11,223 @@ var parsedFormBoughtOrSoldData;
 var user;
 
 $(document).ready(function () {
-    if (localStorage.length > 0) {
-        // delete localStorage.jwtToken;
-        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+
+autoLogin();
+
+/////////TRADE FORM BUTTONS//////////
+addToLog();
+/////////END OF TRADE FORM BUTTONS//////////
+
+getStockTrackFromDB();
+
+///////LANDING BUTTONS////////
+// shows the signup form when either buttons are clicked
+$('#signup-button').on('click', function (event) {
+    event.preventDefault();
+    $('#signup-form-wrapper').toggleClass('hidden');
+    // look for signup sumbit button
+    $('#submit-signup-button').on('click', function (event) {
+        event.preventDefault();
+        var signupSerialize = $('#signup-form').serializeArray();
+        var emailSerialize = signupSerialize[0].value;
+        var passwordSerialize = signupSerialize[1].value;
+        // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
         $.ajax({
-            type: "POST",
-            url: '/verify',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+            method: 'POST',
+            url: '/signup',
+            data: { email: emailSerialize, password: passwordSerialize },
+            success: function (json) {
+                console.log('signed up status', json);
+                localStorage.jwtToken = json.signedJwt;
+                // console.log('token for new signed up user',localStorage.jwtToken);
             },
-            success: function (response) {
-                console.log('login or have token', response)
-                user = { email: response.authData.email, _id: response.authData._id }
-                console.log("you can access variable user: ", user)
-                // if(window.location.pathname == '/'){
-                //     location.href = '/stockTracker';
-                // }else{
-                //     console.log('page: ', window.location.pathname);
-                // }
-            },
-            error: function (err) {
-                console.log('not login or token expired', err);
-            }
-        });
-    }
-
-    /////////TRADE FORM BUTTONS//////////
-    addToLog();
-    /////////END OF TRADE FORM BUTTONS//////////
-
-    // this way copied from postman
-    // var settings = {
-    //     "async": true,
-    //     "crossDomain": true,
-    //     // "url": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U",
-    //     "url": "https://api.iextrading.com/1.0/stock/aapl/chart/5y",
-    //     "method": "GET",
-    //     "headers": {
-    //         "Content-Type": "application/x-www-form-urlencoded",
-    //     }
-    // }
-    // $.ajax(settings)
-    // .done(function (response) {console.log(response);})
-    // .fail(function (err) {console.log(err);})
-
-    ///////LANDING BUTTONS////////
-    // shows the signup form when either buttons are clicked
-    $('#signup-button').on('click', function (event) {
-        event.preventDefault();
-        $('#signup-form-wrapper').toggleClass('hidden');
-        // look for signup sumbit button
-        $('#submit-signup-button').on('click', function (event) {
-            event.preventDefault();
-            var signupSerialize = $('#signup-form').serializeArray();
-            var emailSerialize = signupSerialize[0].value;
-            var passwordSerialize = signupSerialize[1].value;
-            // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
-            $.ajax({
-                method: 'POST',
-                url: '/signup',
-                data: { email: emailSerialize, password: passwordSerialize },
-                success: function (json) {
-                    console.log('signed up status',json);
-                    localStorage.jwtToken = json.signedJwt;
-                    // console.log('token for new signed up user',localStorage.jwtToken);
-                },
-                error: function (e1, e2, e3) { console.log('ERROR ', e2) },
-            });
+            error: function (e1, e2, e3) { console.log('ERROR ', e2) },
         });
     });
-
-    // shows the login form when either buttons are clicked
-    $('#login-button').on('click', function (event) {
-        event.preventDefault();
-        $('#login-form-wrapper').toggleClass('hidden');
-        $('#submit-login-button').on('click', function (event) {
-            event.preventDefault();
-            var loginSerialize = $('#login-form').serializeArray();
-            var emailSerialize = loginSerialize[0].value;
-            var passwordSerialize = loginSerialize[1].value;
-            // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
-            $.ajax({
-                method: 'POST',
-                url: '/login',
-                data: { email: emailSerialize, password: passwordSerialize },
-                success: function (json) {
-                    console.log(json);
-                    localStorage.jwtToken = json.token;
-                    console.log('testing', localStorage.jwtToken);
-                },
-                error: function (e1, e2, e3) { console.log('ERROR ', e2) },
-            });
-        });
-    });
-    ///////END OF LANDING BUTTONS//////////////////////
-
-    // end of document.ready
 });
+
+// shows the login form when either buttons are clicked
+$('#login-button').on('click', function (event) {
+    event.preventDefault();
+    $('#login-form-wrapper').toggleClass('hidden');
+    $('#submit-login-button').on('click', function (event) {
+        event.preventDefault();
+        var loginSerialize = $('#login-form').serializeArray();
+        var emailSerialize = loginSerialize[0].value;
+        var passwordSerialize = loginSerialize[1].value;
+        // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
+        $.ajax({
+            method: 'POST',
+            url: '/login',
+            data: { email: emailSerialize, password: passwordSerialize },
+            success: function (json) {
+                console.log(json);
+                localStorage.jwtToken = json.token;
+                console.log('testing', localStorage.jwtToken);
+            },
+            error: function (e1, e2, e3) { console.log('ERROR ', e2) },
+        });
+    });
+});
+///////END OF LANDING BUTTONS//////////////////////
+// end of document.ready
+});
+
+// do ajax GET, server get data from database to append to html page
+function getStockTrackFromDB() {
+$.ajax({
+    method: 'GET',
+    url: '/api/log',
+    success: function handleSuccess(json) {
+        $('#divLog').empty();
+        for (var i = 0; i < json.data.length; i++) {
+            var curID = json.data[i]._id;
+            var curSymbol = json.data[i].symbol;
+            var curBought_or_sold = json.data[i].bought_or_sold;
+            var curNumShares = json.data[i].numShares;
+            var curTrade_date = json.data[i].trade_date;
+            var curUser = json.data[i].user[0].email;
+            $('#divLog').append(
+                `<p>${curID}, ${curSymbol}, ${curBought_or_sold}, 
+            ${curNumShares}, ${curTrade_date}, ${curUser}</p>
+            <button id='btnDeleteLog' data-id=${curID}>Delete Log</button>`
+            );
+        }
+    },
+    error: function (e) {
+        console.log('Load stock log error!');
+        $('#divLog').text('Load stock log error!');
+    }
+});
+}
+function postStockTrackToDB(formDataObj) {
+$.ajax({
+    method: 'POST',
+    url: '/api/log',
+    data: formDataObj,
+    success: function (json) {
+        console.log('added stock log: ', json);
+        getStockTrackFromDB();
+    },
+    error: function (e) {
+        console.log('add stock log error!');
+        $('#divLog').text('add stock log error!');
+    }
+});
+}
+$('#divLog').on('click', '#btnDeleteLog', function (event) {
+event.preventDefault();
+console.log('clicked delete log button, log id is: ', $(this).attr('data-id'));
+deleteStockTrackFromDB($(this).attr('data-id'));
+});
+function deleteStockTrackFromDB(dataId) {
+$.ajax({
+    method: 'DELETE',
+    url: '/api/log/' + dataId,
+    success: function (json) {
+        console.log('deleted stock log: ', json);
+        getStockTrackFromDB();
+    },
+    error: function (e) {
+        console.log('delete stock log error!');
+        $('#divLog').text('delete stock log error!');
+    }
+});
+}
+
 
 /////////TRADE FORM BUTTONS//////////
 // listen to 'tradeForm' 'addToLog' button that submit form data,
 // (as placeholder) select 'divLog' and append form data to array
 function addToLog() {
-    $('#tradeForm').on('click', '#addToLog', function (event) {
-        event.preventDefault();
-        // serializeArray return array of object instead of string
-        var formDataArr = $(this).parent().serializeArray();
-        parsedFormSymbol = formDataArr.filter(formData => formData.name == 'symbol')[0].value;
-        parsedFormShare = formDataArr.filter(formData => formData.name == 'share')[0].value;
-        parsedFormDate = formDataArr.filter(formData => formData.name == 'date')[0].value;
-        parsedFormBoughtOrSoldData = formDataArr.filter(formData => formData.name == 'boughtOrSold')[0].value;
-        // AJAX request
-        getClosingByDate();
-    });
+$('#tradeForm').on('click', '#addToLog', function (event) {
+    event.preventDefault();
+    // serializeArray return array of object instead of string
+    var formDataArr = $(this).parent().serializeArray();
+    parsedFormSymbol = formDataArr.filter(formData => formData.name == 'symbol')[0].value;
+    parsedFormShare = formDataArr.filter(formData => formData.name == 'share')[0].value;
+    parsedFormDate = formDataArr.filter(formData => formData.name == 'date')[0].value;
+    parsedFormBoughtOrSoldData = formDataArr.filter(formData => formData.name == 'boughtOrSold')[0].value;
+    var formDataObj = { symbol: parsedFormSymbol, numShares: parsedFormShare, trade_date: parsedFormDate, bought_or_sold: parsedFormBoughtOrSoldData };
+    // AJAX requests
+    postStockTrackToDB(formDataObj);
+});
 }
 /////////END OF TRADE FORM BUTTONS//////////
 
 // get the closing price of the input stock symbol on the input date
 function getClosingByDate() {
+$.ajax({
+    async: true,
+    crossDomain: true,
+    method: 'GET',
+    // url: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U',
+    url: baseUrl + parsedFormSymbol + apiKey,
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+    },
+    success: function (response) {
+        var price = response["Time Series (Daily)"][parsedFormDate]["4. close"];
+        console.log('price: ', price);
+
+        parsedFormTotalCost = parsedFormShare * price;
+        var newLog = `<p>${parsedFormSymbol}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormBoughtOrSoldData}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormShare}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormDate}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormTotalCost}</p>`;
+        logArr.push(newLog);
+        $('#divLog').append(newLog);
+    },
+    error: function (err) {
+        console.log(err);
+    }
+});
+}
+
+function autoLogin() {
+if (localStorage.length > 0) {
+    // delete localStorage.jwtToken;
+    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
     $.ajax({
-        async: true,
-        crossDomain: true,
-        method: 'GET',
-        // url: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U',
-        url: baseUrl + parsedFormSymbol + apiKey,
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+        type: "POST",
+        url: '/verify',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
         },
         success: function (response) {
-            var price = response["Time Series (Daily)"][parsedFormDate]["4. close"];
-            parsedFormTotalCost = parsedFormShare * price;
-            var newLog = `<p>${parsedFormSymbol}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormBoughtOrSoldData}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormShare}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormDate}&nbsp;&nbsp;&nbsp;&nbsp;${parsedFormTotalCost}</p>`;
-            logArr.push(newLog);
-            $('#divLog').append(newLog);
+            console.log('login or have token', response)
+            // user = { email: response.authData.email, _id: response.authData._id }
+            // console.log("you can access variable user: ", user)
+            // if (window.location.pathname == '/') {
+            //     location.href = '/stockTracker';
+            // } else {
+            //     console.log('page: ', window.location.pathname);
+            // }
         },
         error: function (err) {
-            console.log(err);
+            console.log('not login or token expired', err);
+            if (window.performance) {
+                console.info("window.performance works fine on this browser");
+            }
+            if (performance.navigation.type == 1) {
+                console.info("This page is reloaded");
+                location.href = '/';
+            } else {
+                console.info("This page is not reloaded");
+            }
         }
-    });
+    })
 }
+}
+
+// postman ajax example
+// var settings = {
+//     "async": true,
+//     "crossDomain": true,
+//     // "url": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U",
+//     "url": "https://api.iextrading.com/1.0/stock/aapl/chart/5y",
+//     "method": "GET",
+//     "headers": {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//     }
+// }
+// $.ajax(settings)
+// .done(function (response) {console.log(response);})
+// .fail(function (err) {console.log(err);})
