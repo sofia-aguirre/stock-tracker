@@ -44,11 +44,10 @@ app.get('/', function homepage(req, res) {
 // })
 
 app.post('/verify', verifyToken, (req, res) => {
-  let verified= jwt.verify(req.token, 'pokemonsecretkey')
+  let verified = jwt.verify(req.token, 'pokemonsecretkey')
   console.log("verified: ", verified)
   res.json(verified)
 });
-
 
 /*
  * JSON API Endpoints
@@ -162,7 +161,7 @@ app.post('/verify', verifyToken, function (req, res) {
     } else {
       res.json({
         message: 'Post created',
-        authData: authData,
+        authData: authData
       });
     }
   });
@@ -183,9 +182,9 @@ function verifyToken(req, res, next) {
     req.token = bearerToken;
     console.log('req.token', req.token);
     ///if verified then send to stocktracker
-          app.get('/stockTracker', function homepage(req, res) {
-            res.sendFile(__dirname + '/views/stockTracker.html');
-          })
+    app.get('/stockTracker', function homepage(req, res) {
+      res.sendFile(__dirname + '/views/stockTracker.html');
+    })
     // Next middleware
     next();
   } else {
@@ -193,6 +192,59 @@ function verifyToken(req, res, next) {
     res.sendStatus(403);
   }
 }
+
+// do route GET, server get data from database and send back to ajax request
+app.get('/api/log', (req, res) => {
+  db.Trade.find({ user: ['5b8b29410f210d1f28e45cbd'] })
+    .populate('user')
+    .exec(function (err, foundTrades) {
+      if (err) { console.log(err); return; }
+      console.log('foundTrades with length: ', foundTrades.length);
+      for (var i = 0; i < foundTrades.length; i++) {
+        console.log(foundTrades[i]);
+      }
+      res.json({ data: foundTrades });
+    });
+});
+
+// do route POST, server add new data to database and send back to ajax request
+app.post('/api/log', (req, res) => {
+  console.log('req.body: ', req.body);
+  var trade = new db.Trade({
+    symbol: req.body.symbol,
+    bought_or_sold: req.body.bought_or_sold,
+    numShares: req.body.numShares,
+    trade_date: req.body.trade_date
+  });
+  db.User.findOne({ email: '1a@a.com' }, 
+  function (err, foundUser) {
+    if (foundUser != null) {
+      trade.user.push(foundUser);
+      trade.save(function (err, savedTrade) {
+        if (err) {
+          console.log(err);
+        }
+        console.log('saved ' + savedTrade);
+        res.json({ data: savedTrade });
+      });
+    } else {
+      console.log('user not found, not add trade log');
+    }
+  });
+});
+
+//DELETE route
+app.delete('/api/log/:id', function (req, res) {
+  // console.log('log delete', req.params);
+  var logId = req.params.id;
+  // find the index of the book we want to remove
+  db.Trade.deleteOne(
+    { _id: logId },
+    (err, deletedLog) => {
+      if (err) { return res.status(400).json({ err: "error has occured" }) }
+      res.json(deletedLog);
+    });
+});
 
 /**********
  * SERVER *
