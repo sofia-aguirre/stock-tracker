@@ -265,6 +265,6 @@ app.delete('/api/log/:id', function (req, res) {
  **********/
 
 // listen on the port that Heroku prescribes (process.env.PORT) OR port 3000
-app.listen(process.env.MONGODB_URI || 3000, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log('Express server is up and running on http://localhost:3000/');
 });
