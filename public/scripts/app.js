@@ -64,9 +64,10 @@ $(document).ready(function () {
                     console.log('json.userId: ', json.userId);
                     localStorage.jwtToken = json.token;
                     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
-                    if (window.location.pathname == '/') {
-                        location.href = `/stockTracker`;
-                    }
+                    verifyStockTracker();
+                    // if (window.location.pathname == '/') {
+                    //     location.href = `/stockTracker`;
+                    // }
                     // $.ajax({
                     //     method: 'GET',
                     //     url: '/stockTracker',
@@ -117,8 +118,8 @@ function getStockTrackFromDB() {
 }
 function postStockTrackToDB(formDataObj, parsedFormTotalCost) {
     formDataObj.tradedPrice = parsedFormTotalCost;
-    console.log('formDataObj: ',formDataObj);
-    
+    console.log('formDataObj: ', formDataObj);
+
     $.ajax({
         method: 'POST',
         url: '/api/log',
@@ -208,6 +209,22 @@ function autoLogin() {
             },
             success: function (response) {
                 console.log('login or have token', response)
+                window.setInterval(function () {
+                    if (Date.now() / 1000 - response.authData.exp > 0) {
+                        console.log('time is up');
+                        clearInterval();
+                        delete localStorage.jwtToken;
+                        location.href = '/';
+                    } else {
+                        console.log('still alive');
+                    }
+                }, 1000);
+                
+                // if (Date.now() / 1000 - response.authData.exp > 0) {
+                //     console.log('time is up');
+                // } else {
+                //     console.log('still alive');
+                // }
                 // user = { email: response.authData.email, _id: response.authData._id }
                 // console.log("you can access variable user: ", user)
                 // if (window.location.pathname == '/') {
@@ -231,6 +248,89 @@ function autoLogin() {
         })
     }
 }
+function verifyStockTracker() {
+    if (localStorage.length > 0) {
+        // delete localStorage.jwtToken;
+        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+        $.ajax({
+            type: "POST",
+            url: '/stockTracker',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+            },
+            success: function (response) {
+                console.log('login or have token 2', response)
+                // user = { email: response.authData.email, _id: response.authData._id }
+                // console.log("you can access variable user: ", user)
+                if (window.location.pathname == '/') {
+                    location.href = '/stockTracker';
+                } else {
+                    console.log('page: ', window.location.pathname);
+                }
+            },
+            error: function (err) {
+                console.log('not login or token expired', err);
+                if (window.performance) {
+                    console.info("window.performance works fine on this browser");
+                }
+                if (performance.navigation.type == 1) {
+                    console.info("This page is reloaded");
+                    location.href = '/';
+                } else {
+                    console.info("This page is not reloaded");
+                }
+            }
+        })
+    }
+}
+function checkForLogin() {
+    if (localStorage.length > 0) {
+        $.ajax({
+            type: "POST",
+            url: '/verify',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+            },
+            success: function (response) {
+                console.log(response)
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+}
+
+// logout from stockTracker page back to landing page
+// $('#logOut').on('click', function (event) {
+//     event.preventDefault();
+//     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+//     delete localStorage.jwtToken;
+//     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+//     // checkForLogin();
+
+//     // I want to use token here
+//     // like remove the token or something
+//     // then not allow user to access /stockTracker page, which require login again
+//     // if (window.location.pathname == '/stockTracker') {
+//     //     location.href = `/`;
+//     // }
+// });
+
+$('#logOut').on('click', function (event) {
+    event.preventDefault();
+    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+    delete localStorage.jwtToken;
+    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+    // checkForLogin();
+
+    // I want to use token here
+    // like remove the token or something
+    // then not allow user to access /stockTracker page, which require login again
+    // if (window.location.pathname == '/stockTracker') {
+    //     location.href = `/`;
+    // }
+});
 
 // postman ajax example
 // var settings = {

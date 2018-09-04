@@ -45,12 +45,42 @@ app.get('/', function homepage(req, res) {
 
 app.get('/stockTracker', function homepage(req, res) {
   res.sendFile(__dirname + '/views/stockTracker.html');
+  // let verified = jwt.verify(req.token, 'pokemonsecretkey');
+  // if(verified){
+  //   res.sendFile(__dirname + '/views/stockTracker.html');
+  // }else{
+  //   res.redirect('/');
+  // }
 })
 
 app.post('/verify', verifyToken, (req, res) => {
-  let verified = jwt.verify(req.token, 'pokemonsecretkey')
-  console.log("verified: ", verified)
-  res.json(verified)
+  // let verified = jwt.verify(req.token, 'pokemonsecretkey')
+  // console.log("verified: ", verified)
+  // res.json(verified)
+  console.log(req.token)
+  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+    if(err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: 'Post created',
+        authData: authData
+      });
+    }
+  });
+});
+app.post('/stockTracker', verifyToken, (req, res) => {
+  console.log(req.token)
+  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+    if(err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: 'Post created',
+        authData: authData
+      });
+    }
+  });
 });
 
 /*
@@ -81,6 +111,7 @@ app.post('/signup', function signup(req, res) {
             { password: 0 },
             function (err, createdUser) {
               createdUser = createdUser[0]
+              // create a json web token here, but we did not use for log in the use at the same time
               jwt.sign(
                 { createdUser },
                 "pokemonsecretkey",
@@ -122,7 +153,8 @@ app.post('/login', function signup(req, res) {
             }
             if (match) {
               console.log("MATCH: ", match);
-              // create a json web token
+              // create a json web token here
+              // then save to frondend browser localstorage
               const token = jwt.sign(
                 {
                   // add some identifying information
@@ -134,7 +166,7 @@ app.post('/login', function signup(req, res) {
                 // these are options, not necessary
                 {
                   // its good practice to have an expiration amount for jwt tokens.
-                  expiresIn: "3h"
+                  expiresIn: "30s"
                 },
               );
               console.log("NEW TOKEN: ", token);
@@ -157,7 +189,19 @@ app.post('/login', function signup(req, res) {
       }
     );
 });
-
+app.post('/stockTracker', verifyToken, (req, res) => {
+  console.log(req.token)
+  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+    if(err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: 'Post created in stockTracker',
+        authData: authData
+      });
+    }
+  });
+});
 // when requet for route /verify,
 // first use middleware to check for token store in header in the browser,
 // if no token or bad token send status 403 no access, else get the token, next,
@@ -178,10 +222,9 @@ app.post('/verify', verifyToken, function (req, res) {
 
 function verifyToken(req, res, next) {
   console.log("in verify...");
-  // Get auth header value
-  // when we send our token, we want to send it in our header
+  // Get auth header value when we send our token, we want to send it in our header
   const bearerHeader = req.headers['authorization'];
-  console.log('testing2', bearerHeader)
+  console.log('bearerHeader: ', bearerHeader)
   // Check if bearer is undefined
   if (typeof bearerHeader !== 'undefined') {
     const bearer = bearerHeader.split(' ');
@@ -190,10 +233,10 @@ function verifyToken(req, res, next) {
     // Set the token
     req.token = bearerToken;
     console.log('req.token', req.token);
-    ///if verified then send to stocktracker
-    app.get('/stockTracker', function homepage(req, res) {
-      res.sendFile(__dirname + '/views/stockTracker.html');
-    })
+    // if verified then send to stocktracker
+    // app.get('/stockTracker', function homepage(req, res) {
+    //   res.sendFile(__dirname + '/views/stockTracker.html');
+    // })
     // Next middleware
     next();
   } else {
