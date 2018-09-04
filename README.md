@@ -94,6 +94,25 @@ the goal here is to get form data, ajax get request stock api, filter the respon
 when add new trade info to log, use the form's stock symbol and date as filtering criteria for ajax request.
 ajax request from stock data for 5 to 20 years (depends on which api).
 
+13)
+ajax get request stock app for stock data,
+filter response json data.
+
+14)
+jquery string litteral of data to stocktracker page, as log.
+
+15)
+signup button creates user in database.
+user bcrypt to hash password, then store into database.
+
+16)
+login button fetch user from database and redirect to tracker page.
+signup and login button add json web token and checks verify on page refresh.
+
+17)
+one user to many trade database reference. trade model find one user with thte same user id.
+just display logs belongs to that userwho singed in.
+
 
 ### extra
 toggle button for buy/sell
@@ -118,3 +137,4 @@ As a team member work on 1 branch as a collaborater, initialy create a project r
 14) fetch origin master
 15) pull origin master
 16) push origin YI
+17) for changes that not stage and you want to remove use git stash or git checkout -- filename or git reset --hard
