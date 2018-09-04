@@ -18,13 +18,13 @@
 ## Existing Features
 - Signup.
 - Login.
-![fetch stock data display log](images/landing-page-shot.png)
+![login landing page](/public/images/landing-page-shot.png)
 - Verify jsonwebtoken.
 - Authentication.
 - bcrypt password.
 - Fetch old stock data.
 - Display trade logs by current logged in uer.
-![fetch stock data display log](images/tracker-page-shot.png)
+![fetch stock data display log](/public/images/tracker-page-shot.png)
 - GET, POST, DELETE from mongoDB for users and logs.
 
 ## Planned Features
@@ -112,6 +112,12 @@ signup and login button add json web token and checks verify on page refresh.
 17)
 one user to many trade database reference. trade model find one user with thte same user id.
 just display logs belongs to that userwho singed in.
+
+18) 
+Heroku lessons learned:
+- must include [ mongoose.connect( process.env.MONGODB_URI || "mongodb://localhost/stock-tracker10",  { useMongoClient: true }); ] inside the models index.js
+- heroku only takes master branch
+- must include Procfile containing "web: node server.js" (replace server.js with wherever your project begins)
 
 
 ### extra
