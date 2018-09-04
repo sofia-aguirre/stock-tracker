@@ -23,6 +23,10 @@ app.use(function (req, res, next) {
  ************/
 const db = require('./models');
 
+// should set to null when logout / token expire, reset on login / signup
+var loggedInUserId;
+var loggedInUser;
+
 /**********
  * ROUTES *
  **********/
@@ -39,9 +43,9 @@ app.get('/', function homepage(req, res) {
   // res.sendFile(__dirname + '/views/stockTracker.html');
 });
 
-// app.get('/stockTracker', function homepage(req, res) {
-//   res.sendFile(__dirname + '/views/stockTracker.html');
-// })
+app.get('/stockTracker', function homepage(req, res) {
+  res.sendFile(__dirname + '/views/stockTracker.html');
+})
 
 app.post('/verify', verifyToken, (req, res) => {
   let verified = jwt.verify(req.token, 'pokemonsecretkey')
@@ -64,7 +68,7 @@ app.post('/signup', function signup(req, res) {
     // if foundUser's length === 0
     // we need to create a new user
     if (foundUser.length >= 1) {
-      res.json({ message: 'email already exists' });
+      res.json({ message: 'email already exists', foundUser: foundUser });
     } else {
       bcrypt.hash(req.body.password, 10, (err, hash) => {
         if (err) {
@@ -108,6 +112,7 @@ app.post('/login', function signup(req, res) {
         if (foundUser.length === 0) {
           res.json({ message: "Email/Password incorrect" });
         } else {
+          console.log("foundUser id: ", foundUser[0]._id);
           console.log("PASSAWORD1: ", formPassword)
           console.log("foundUser[0].password: ", foundUser[0].password)
           bcrypt.compare(formPassword, foundUser[0].password, function (err, match) {
@@ -129,14 +134,18 @@ app.post('/login', function signup(req, res) {
                 // these are options, not necessary
                 {
                   // its good practice to have an expiration amount for jwt tokens.
-                  expiresIn: "1m"
+                  expiresIn: "3h"
                 },
               );
               console.log("NEW TOKEN: ", token);
+              loggedInUserId = foundUser[0]._id;
+              loggedInUser = foundUser[0];
+              console.log("current User id: ", foundUser[0]._id);
               return res.status(200).json(
                 {
                   message: 'Auth successful',
-                  token: token
+                  token: token,
+                  userId: foundUser[0]._id
                 }
               )
             } else {
@@ -195,7 +204,10 @@ function verifyToken(req, res, next) {
 
 // do route GET, server get data from database and send back to ajax request
 app.get('/api/log', (req, res) => {
-  db.Trade.find({ user: ['5b8b29410f210d1f28e45cbd'] })
+  // db.Trade.find({ user: ['5b8d95118aaa70370b49e1c4'] })
+  console.log('loggedInUser._id: ', loggedInUser._id);
+  
+  db.Trade.find({ user: [loggedInUser._id] })
     .populate('user')
     .exec(function (err, foundTrades) {
       if (err) { console.log(err); return; }
@@ -214,9 +226,11 @@ app.post('/api/log', (req, res) => {
     symbol: req.body.symbol,
     bought_or_sold: req.body.bought_or_sold,
     numShares: req.body.numShares,
-    trade_date: req.body.trade_date
+    trade_date: req.body.trade_date,
+    tradedPrice: req.body.tradedPrice
   });
-  db.User.findOne({ email: '1a@a.com' }, 
+  // db.User.findOne({ email: 'a@a.com' }, 
+  db.User.findOne({ email: loggedInUser.email }, 
   function (err, foundUser) {
     if (foundUser != null) {
       trade.user.push(foundUser);

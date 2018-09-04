@@ -9,7 +9,8 @@ const TradeSchema = new Schema({
     }],
     bought_or_sold: String,
     numShares: Number,
-    trade_date: Date
+    trade_date: Date,
+    tradedPrice: Number
 });
 
 var Trade = mongoose.model('Trade', TradeSchema);
