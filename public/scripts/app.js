@@ -9,6 +9,8 @@ var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
 var user;
+var totalBought = 0;
+var totalSold = 0;
 
 $(document).ready(function () {
 
@@ -18,7 +20,7 @@ $(document).ready(function () {
     addToLog();
     /////////END OF TRADE FORM BUTTONS//////////
 
-    getStockTrackFromDB();
+    // getStockTrackFromDB();
 
     ///////LANDING BUTTONS////////
     // shows the signup form when either buttons are clicked
@@ -94,6 +96,8 @@ function getStockTrackFromDB() {
         method: 'GET',
         url: '/api/log',
         success: function handleSuccess(json) {
+            totalBought = 0;
+            totalSold = 0;
             console.log('successfully load stock log: ', json);
             $('#divLog').empty();
             for (var i = 0; i < json.data.length; i++) {
@@ -108,6 +112,13 @@ function getStockTrackFromDB() {
                     `<p> Stock: ${curSymbol} -  ${curBought_or_sold} ${curNumShares} share(s) worth $${curTradedPrice} on ${curTrade_date} - Trade #:${curID}</p>
             <button id='btnDeleteLog' data-id=${curID}>Delete Log</button>`
                 );
+                if (curBought_or_sold === 'bought'){
+                    totalBought += parseFloat(curTradedPrice);
+                    $('#boughtTotal').text(`-$${(totalBought).toFixed(2)}`);
+                } else if (curBought_or_sold === 'sold') {
+                    totalSold += parseFloat(curTradedPrice);
+                    $('#soldTotal').text(`+$${(totalSold).toFixed(2)}`);
+                }
             }
         },
         error: function (e) {
@@ -199,6 +210,9 @@ function getClosingByDate(formDataObj) {
 
 function autoLogin() {
     if (localStorage.length > 0) {
+        if(localStorage.jwtToken != undefined){
+            getStockTrackFromDB();
+        }
         // delete localStorage.jwtToken;
         console.log('localStorage.jwtToken: ', localStorage.jwtToken);
         $.ajax({
@@ -211,12 +225,12 @@ function autoLogin() {
                 console.log('login or have token', response)
                 window.setInterval(function () {
                     if (Date.now() / 1000 - response.authData.exp > 0) {
-                        console.log('time is up');
+                        // console.log('time is up localStorage.jwtToken:', localStorage.jwtToken);
                         clearInterval();
                         delete localStorage.jwtToken;
                         location.href = '/';
                     } else {
-                        console.log('still alive');
+                        // console.log('still alive localStorage.jwtToken: ',localStorage.jwtToken);
                     }
                 }, 1000);
                 
@@ -327,9 +341,9 @@ $('#logOut').on('click', function (event) {
     // I want to use token here
     // like remove the token or something
     // then not allow user to access /stockTracker page, which require login again
-    // if (window.location.pathname == '/stockTracker') {
-    //     location.href = `/`;
-    // }
+    if (window.location.pathname == '/stockTracker') {
+        location.href = `/`;
+    }
 });
 
 // postman ajax example

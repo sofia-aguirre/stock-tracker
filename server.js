@@ -166,7 +166,7 @@ app.post('/login', function signup(req, res) {
                 // these are options, not necessary
                 {
                   // its good practice to have an expiration amount for jwt tokens.
-                  expiresIn: "30s"
+                  expiresIn: "24h"
                 },
               );
               console.log("NEW TOKEN: ", token);
