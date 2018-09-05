@@ -9,7 +9,9 @@ const bcrypt = require('bcrypt');
 const dotenv = require('dotenv').config();
 // parse incoming urlencoded form data and populate the req.body object
 const bodyParser = require('body-parser');
-const controller = require('./controllers')
+const controller = require('./controllers');
+const routes = require('./config');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // allow cross origin requests (optional)
@@ -79,15 +81,15 @@ app.post('/login', controller.log.loginTheUser);
 // trade log, route GET, server get log data from database and send back to ajax request,
 // about the schema, each trade log will have a user's id as reference, 
 // that mean each user can have many trade logs and tagged on each log.
-app.get('/api/log', controller.log.getUserTrades);
 
 // trade log, route POST, server add new log to database and send back to ajax request, 
 // app.js will call GET route to display again
-app.post('/api/log', controller.log.postUserTrades);
 
 // trade log, route DELETE, server delete clicked log from database and send back to ajax request,
 // app.js will call GET route to display again
-app.delete('/api/log/:id', controller.log.deleteOneLog);
+app.use(    '/api/log', routes.logRoutes);
+
+
 
 /**********
  * SERVER *
