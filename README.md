@@ -30,6 +30,7 @@
 - Display trade logs by current logged in uer.
 ![fetch stock data display log](/public/images/tracker-page-shot.png)
 - GET, POST, DELETE from mongoDB for users and logs.
+- Note on CRUD development: no UPDATE is a design choice, as team felt it defeated the purpose of a tracking app.
 - Calculate the total bought and total sold worth of shares.
 
 ## Planned Features
