@@ -69,7 +69,7 @@ $(document).ready(function () {
                 url: '/login',
                 data: { email: emailSerialize, password: passwordSerialize },
                 success: function (json) {
-                    console.log('THIS IS AN IMAGE' + parsedFormImageURL)
+                    // console.log('THIS IS AN IMAGE' + parsedFormImageURL)
                     // $('#user-pic').attr('src', parsedFormImageURL);
                     console.log('json.userId: ', json.userId);
                     localStorage.jwtToken = json.token;
