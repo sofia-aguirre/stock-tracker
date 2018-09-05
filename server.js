@@ -90,6 +90,7 @@ app.post('/signup', function signup(req, res) {
   var signupForm = req.body;
   var formEmail = signupForm.email;
   var formPassword = signupForm.password;
+  var formImageURL = signupForm.imageURL;
 
   db.User.find({ email: formEmail }, function (err, foundUser) {
     if (err) { res.json({ err }) }
@@ -107,7 +108,7 @@ app.post('/signup', function signup(req, res) {
           // we now have a successful hashed password
         } else {
           db.User.create(
-            { email: formEmail, password: hash },
+            { email: formEmail, password: hash, imageURL: formImageURL },
             { password: 0 },
             function (err, createdUser) {
               createdUser = createdUser[0]

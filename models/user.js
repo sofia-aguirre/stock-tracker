@@ -7,7 +7,8 @@ const UserSchema = new Schema({
         required: true, 
         unique: true, 
         match: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/ },
-        password: { type: String, required: true , select: false}
+        password: { type: String, required: true , select: false},
+        imageURL: String
 })
 
 var User = mongoose.model('User', UserSchema);

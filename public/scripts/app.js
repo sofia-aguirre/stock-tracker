@@ -8,6 +8,7 @@ var parsedFormDate;
 var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
+var parsedFormImageURL;
 var user;
 var totalBought = 0;
 var totalSold = 0;
@@ -22,6 +23,8 @@ $(document).ready(function () {
 
     // getStockTrackFromDB();
 
+    
+
     ///////LANDING BUTTONS////////
     // shows the signup form when either buttons are clicked
     $('#signup-button').on('click', function (event) {
@@ -33,15 +36,18 @@ $(document).ready(function () {
             var signupSerialize = $('#signup-form').serializeArray();
             var emailSerialize = signupSerialize[0].value;
             var passwordSerialize = signupSerialize[1].value;
+            var userImage = signupSerialize[2].value;
             // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
             $.ajax({
                 method: 'POST',
                 url: '/signup',
-                data: { email: emailSerialize, password: passwordSerialize },
+                data: { email: emailSerialize, password: passwordSerialize, imageURL: userImage },
                 success: function (json) {
                     console.log('signed up status', json);
+                    console.log('signed up status', json.createdUser.imageURL);
+                    parsedFormImageURL = json.createdUser.imageURL;
                     localStorage.jwtToken = json.signedJwt;
-                    // console.log('token for new signed up user',localStorage.jwtToken);
+                    console.log('token for new signed up user',localStorage.jwtToken);
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
@@ -63,6 +69,8 @@ $(document).ready(function () {
                 url: '/login',
                 data: { email: emailSerialize, password: passwordSerialize },
                 success: function (json) {
+                    console.log('THIS IS AN IMAGE' + parsedFormImageURL)
+                    // $('#user-pic').attr('src', parsedFormImageURL);
                     console.log('json.userId: ', json.userId);
                     localStorage.jwtToken = json.token;
                     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
