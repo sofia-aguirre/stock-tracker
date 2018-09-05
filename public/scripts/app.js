@@ -36,18 +36,16 @@ $(document).ready(function () {
             var signupSerialize = $('#signup-form').serializeArray();
             var emailSerialize = signupSerialize[0].value;
             var passwordSerialize = signupSerialize[1].value;
-            var userImage = signupSerialize[2].value;
+            var imageURLSerialize = signupSerialize[2].value;
             // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
             $.ajax({
                 method: 'POST',
                 url: '/signup',
-                data: { email: emailSerialize, password: passwordSerialize, imageURL: userImage },
+                data: { email: emailSerialize, password: passwordSerialize, imageURL: imageURLSerialize },
                 success: function (json) {
                     console.log('signed up status', json);
-                    console.log('signed up status', json.createdUser.imageURL);
-                    parsedFormImageURL = json.createdUser.imageURL;
                     localStorage.jwtToken = json.signedJwt;
-                    console.log('token for new signed up user',localStorage.jwtToken);
+                    // console.log('token for new signed up user',localStorage.jwtToken);
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
@@ -67,7 +65,7 @@ $(document).ready(function () {
             $.ajax({
                 method: 'POST',
                 url: '/login',
-                data: { email: emailSerialize, password: passwordSerialize },
+                data: { email: emailSerialize, password: passwordSerialize},
                 success: function (json) {
                     // console.log('THIS IS AN IMAGE' + parsedFormImageURL)
                     // $('#user-pic').attr('src', parsedFormImageURL);
@@ -127,6 +125,7 @@ function getStockTrackFromDB() {
                     totalSold += parseFloat(curTradedPrice);
                     $('#soldTotal').text(`+$${(totalSold).toFixed(2)}`);
                 }
+                // console.log('THIS IS AN IMAGE' + parsedFormImageURL);
             }
         },
         error: function (e) {
@@ -231,6 +230,7 @@ function autoLogin() {
             },
             success: function (response) {
                 console.log('login or have token', response)
+                $('#imageURL').attr("src",response.authData.imageURL);
                 window.setInterval(function () {
                     if (Date.now() / 1000 - response.authData.exp > 0) {
                         // console.log('time is up localStorage.jwtToken:', localStorage.jwtToken);

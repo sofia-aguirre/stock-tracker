@@ -46,3 +46,6 @@ body{
 button{
     background-color: darkgrey;
 }
+#imageURL{
+    width: 100%;
+}
