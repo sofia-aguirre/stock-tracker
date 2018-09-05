@@ -9,31 +9,35 @@
 - __jQuery__ Interactivity and render log data.
 - __Templating__ Using template strings.
 - __MongoDB__ Persist two models to a Mongo Database. Use one one-to-many relationship between models with reference data.
+- __dotenv__ Hides key:value pairs inside a hidden file for server use.
 - __Git__ Using Git and github.
 - __Code Style__ Using CSS.
 - __Visual Design__ Use Flexbox, CSS Grid, Bootstrap.
 - __Heroku__ [Heroku link](https://fast-beach-84181.herokuapp.com/).
+- __mLab__ Heroku module to process MongoDB databases for use with node applications
 - __Documentation__ This README.md file and inline comments. 
 
 ## Existing Features
 - Signup.
 - Login.
 ![login landing page](/public/images/landing-page-shot.png)
-- Verify jsonwebtoken.
+- Logout.
+- User input image url for profile picture.
+- Verify jsonwebtoken (secret key is hidden in dotenv environment).
 - Authentication.
 - bcrypt password.
-- Fetch old stock data.
+- Fetch old stock data (up to 20 years).
 - Display trade logs by current logged in uer.
 ![fetch stock data display log](/public/images/tracker-page-shot.png)
 - GET, POST, DELETE from mongoDB for users and logs.
+- Note on CRUD development: no UPDATE is a design choice, as team felt it defeated the purpose of a tracking app.
+- Calculate the total bought and total sold worth of shares.
 
 ## Planned Features
 - Find out how to user token store in browser header.
-- Logout.
 - Auto login.
-- CSS more.
-- Learn dotenv, how to hide important data with envirnment variable.
-- Calculate more useful data for stock trade.
+- Fix CSS image max height
+- Recalculate the portfolio worth on delete
 
 ## Work flows
 1)

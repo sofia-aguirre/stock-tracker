@@ -1,6 +1,6 @@
 console.log("Sanity Check: JS is working!");
-// (placeholder) logArr store new log, later replace array with mongodb
-var logArr = [];
+
+//global variables
 var baseUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=";
 var apiKey = "&apikey=CUGQ1VDKVRZ77B9U";
 var parsedFormSymbol;
@@ -8,29 +8,23 @@ var parsedFormDate;
 var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
-var parsedFormImageURL;
 var user;
 var totalBought = 0;
 var totalSold = 0;
 
 $(document).ready(function () {
 
+    //allows access to user's data in /stockTracker if token is still valid
     autoLogin();
-
-    /////////TRADE FORM BUTTONS//////////
+    //serializes all forms inside /stockTrader to add to the log
     addToLog();
-    /////////END OF TRADE FORM BUTTONS//////////
-
-    // getStockTrackFromDB();
-
-    
 
     ///////LANDING BUTTONS////////
-    // shows the signup form when either buttons are clicked
+    // toggles the signup form when corresponding button is clicked
     $('#signup-button').on('click', function (event) {
         event.preventDefault();
         $('#signup-form-wrapper').toggleClass('hidden');
-        // look for signup sumbit button
+        // when the signup sumbit button is clicked, form data is serialized and sent to server
         $('#submit-signup-button').on('click', function (event) {
             event.preventDefault();
             var signupSerialize = $('#signup-form').serializeArray();
@@ -38,12 +32,15 @@ $(document).ready(function () {
             var passwordSerialize = signupSerialize[1].value;
             var imageURLSerialize = signupSerialize[2].value;
             // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
+
+            //post method to add the user's data to the database and assign a token
             $.ajax({
                 method: 'POST',
                 url: '/signup',
                 data: { email: emailSerialize, password: passwordSerialize, imageURL: imageURLSerialize },
                 success: function (json) {
-                    console.log('signed up status', json);
+                    // console.log('signed up status', json);
+                    //places the jwt token from server.js inside the local storage
                     localStorage.jwtToken = json.signedJwt;
                     // console.log('token for new signed up user',localStorage.jwtToken);
                 },
@@ -52,10 +49,11 @@ $(document).ready(function () {
         });
     });
 
-    // shows the login form when either buttons are clicked
+    // toggles the login form when corresponding button is clicked
     $('#login-button').on('click', function (event) {
         event.preventDefault();
         $('#login-form-wrapper').toggleClass('hidden');
+            // when the login sumbit button is clicked, form data is serialized and sent to server
         $('#submit-login-button').on('click', function (event) {
             event.preventDefault();
             var loginSerialize = $('#login-form').serializeArray();
@@ -67,36 +65,23 @@ $(document).ready(function () {
                 url: '/login',
                 data: { email: emailSerialize, password: passwordSerialize},
                 success: function (json) {
-                    // console.log('THIS IS AN IMAGE' + parsedFormImageURL)
-                    // $('#user-pic').attr('src', parsedFormImageURL);
                     console.log('json.userId: ', json.userId);
+                    //places a new jwt token from server.js inside the local storage
                     localStorage.jwtToken = json.token;
                     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+                    //calls method to verify the token is valid, if valid redirects to tracker page
                     verifyStockTracker();
-                    // if (window.location.pathname == '/') {
-                    //     location.href = `/stockTracker`;
-                    // }
-                    // $.ajax({
-                    //     method: 'GET',
-                    //     url: '/stockTracker',
-                    //     // data: {userId: json.userId},
-                    //     success: function (json) {
-                    //         console.log('go to stockTracker page: ', json);
-                    //     },
-                    //     error: function (e) {
-                    //         console.log('go to stockTracker page error!');
-                    //     }
-                    // });
                 },
                 error: function (e1, e2, e3) { console.log('ERROR ', e2) },
             });
         });
     });
     ///////END OF LANDING BUTTONS//////////////////////
+
     // end of document.ready
 });
 
-// do ajax GET, server get data from database to append to html page
+// GET req through server to grab specific stock data from API and then append to html page
 function getStockTrackFromDB() {
     $.ajax({
         method: 'GET',
@@ -104,8 +89,10 @@ function getStockTrackFromDB() {
         success: function handleSuccess(json) {
             totalBought = 0;
             totalSold = 0;
-            console.log('successfully load stock log: ', json);
+            // console.log('Successfully loaded stock log: ', json);
+            //if successful, the log will empty
             $('#divLog').empty();
+            //then will cycle through the stock api to grab the values for the following
             for (var i = 0; i < json.data.length; i++) {
                 var curID = json.data[i]._id;
                 var curSymbol = json.data[i].symbol;
@@ -114,10 +101,15 @@ function getStockTrackFromDB() {
                 var curTrade_date = json.data[i].trade_date;
                 var curTradedPrice = json.data[i].tradedPrice;
                 var curUser = json.data[i].user[0].email;
+                //when values are grabbed from API, use string literals to make a new "log" in the html
+                //inside the #divLog element
                 $('#divLog').append(
                     `<p> Stock: ${curSymbol} -  ${curBought_or_sold} ${curNumShares} share(s) worth $${curTradedPrice} on ${curTrade_date} - Trade #:${curID}</p>
             <button id='btnDeleteLog' data-id=${curID}>Delete Log</button>`
                 );
+                //also, use the grabbed values from above to calculate the total bought/sold values
+                //by making an accumulator for each section and insert them inside the 
+                //boxes in the html (replacing the text of those elements entirely)
                 if (curBought_or_sold === 'bought'){
                     totalBought += parseFloat(curTradedPrice);
                     $('#boughtTotal').text(`-$${(totalBought).toFixed(2)}`);
@@ -125,88 +117,100 @@ function getStockTrackFromDB() {
                     totalSold += parseFloat(curTradedPrice);
                     $('#soldTotal').text(`+$${(totalSold).toFixed(2)}`);
                 }
-                // console.log('THIS IS AN IMAGE' + parsedFormImageURL);
             }
         },
         error: function (e) {
-            console.log('Load stock log error!');
-            $('#divLog').text('Load stock log error!');
+            //if error, makes sure that the only thing that shows in the log is an error message
+            console.log('Load stock log error, please log in!');
+            $('#divLog').text('Load stock log error, please log in!');
         }
     });
 }
+
+//sends the data in the tracker fields for use in other ajax requests
 function postStockTrackToDB(formDataObj, parsedFormTotalCost) {
+    //sets the traded price as a parsed version of the number
     formDataObj.tradedPrice = parsedFormTotalCost;
     console.log('formDataObj: ', formDataObj);
-
     $.ajax({
         method: 'POST',
         url: '/api/log',
         data: formDataObj,
         success: function (json) {
-            // console.log('added stock log: ', json.data.tradedPrice);
+            //on success, post this info to the following method
             getStockTrackFromDB();
         },
         error: function (e) {
-            console.log('add stock log error!');
-            $('#divLog').text('add stock log error!');
+            console.log('Error! Cannot add to stock log. Please make sure to log in!');
+            $('#divLog').text('Error! Cannot add to stock log. Please make sure to log in!');
         }
     });
 }
+
+//adds a delete button to every log and calls delete function
 $('#divLog').on('click', '#btnDeleteLog', function (event) {
     event.preventDefault();
-    console.log('clicked delete log button, log id is: ', $(this).attr('data-id'));
+    // console.log('clicked delete log button, log id is: ', $(this).attr('data-id'));
     deleteStockTrackFromDB($(this).attr('data-id'));
 });
+
+//grabs the id of the data requested and deletes it from the database
 function deleteStockTrackFromDB(dataId) {
     $.ajax({
         method: 'DELETE',
         url: '/api/log/' + dataId,
         success: function (json) {
             console.log('deleted stock log: ', json);
+            //re runs the following method
             getStockTrackFromDB();
         },
         error: function (e) {
-            console.log('delete stock log error!');
-            $('#divLog').text('delete stock log error!');
+            //tells the user on error to reload/login again
+            console.log('ERROR: Cannot delete stock log, please reload/login again!');
+            $('#divLog').text('ERROR: Cannot delete stock log, please reload/login again!');
         }
     });
 }
 
-
-/////////TRADE FORM BUTTONS//////////
 // listen to 'tradeForm' 'addToLog' button that submit form data,
-// (as placeholder) select 'divLog' and append form data to array
+// (as placeholder) selects 'divLog' and appends form data to array
 function addToLog() {
     $('#tradeForm').on('click', '#addToLog', function (event) {
         event.preventDefault();
-        // serializeArray return array of object instead of string
+        // serializeArray returns an array of object instead of strings
+        // sets values inside global variables
         var formDataArr = $(this).parent().serializeArray();
         parsedFormSymbol = formDataArr.filter(formData => formData.name == 'symbol')[0].value;
         parsedFormShare = formDataArr.filter(formData => formData.name == 'share')[0].value;
         parsedFormDate = formDataArr.filter(formData => formData.name == 'date')[0].value;
         parsedFormBoughtOrSoldData = formDataArr.filter(formData => formData.name == 'boughtOrSold')[0].value;
         var formDataObj = { symbol: parsedFormSymbol, numShares: parsedFormShare, trade_date: parsedFormDate, bought_or_sold: parsedFormBoughtOrSoldData };
-        // AJAX requests
+        // sends the entire serialized data from the trade form as a parameter for the following method
         getClosingByDate(formDataObj);
     });
 }
-/////////END OF TRADE FORM BUTTONS//////////
 
-// get the closing price of the input stock symbol on the input date
+//GETS the closing price of the input stock symbol on the input date using the
+//serialized form data from above
 function getClosingByDate(formDataObj) {
     $.ajax({
         async: true,
         crossDomain: true,
         method: 'GET',
-        // url: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U',
+        //the url variables are divided into sections in order to conform
+        //to the url set by the API: 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U',
         url: baseUrl + parsedFormSymbol + apiKey,
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         success: function (response) {
+            //grabs the json value of specific stock
+            //from the API for Daily, uses user's serialized date specification, grabs that date's closing price
             var price = response["Time Series (Daily)"][parsedFormDate]["4. close"];
-            console.log('price: ', price);
+            // console.log('The single price for the selected stock is: ', price);
+            //calculates the total cost of of the shares (shares times single price)
             parsedFormTotalCost = parsedFormShare * price;
+            //sends data to following method as params
             postStockTrackToDB(formDataObj, parsedFormTotalCost);
         },
         error: function (err) {
@@ -215,48 +219,46 @@ function getClosingByDate(formDataObj) {
     });
 }
 
+//redirects if token is verified
 function autoLogin() {
+    //if there is a token in the client, then
     if (localStorage.length > 0) {
+        //if the token is valid, then grab the user's log from database
         if(localStorage.jwtToken != undefined){
             getStockTrackFromDB();
         }
         // delete localStorage.jwtToken;
-        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+        // console.log('Your token is: ', localStorage.jwtToken);
+
+        //verify the token
         $.ajax({
             type: "POST",
             url: '/verify',
             beforeSend: function (xhr) {
+                //send token to header
                 xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
             },
             success: function (response) {
-                console.log('login or have token', response)
+                // console.log('Success: Login or has token', response)
+                //on success make the user's image url the source for the picture in the html
                 $('#imageURL').attr("src",response.authData.imageURL);
+                //for devs, set a counter of the token's expiration
                 window.setInterval(function () {
                     if (Date.now() / 1000 - response.authData.exp > 0) {
                         // console.log('time is up localStorage.jwtToken:', localStorage.jwtToken);
                         clearInterval();
+                        //upon token expiration, delete the token from client!
                         delete localStorage.jwtToken;
+                        //immediate redirect to home /
                         location.href = '/';
                     } else {
                         // console.log('still alive localStorage.jwtToken: ',localStorage.jwtToken);
                     }
                 }, 1000);
-                
-                // if (Date.now() / 1000 - response.authData.exp > 0) {
-                //     console.log('time is up');
-                // } else {
-                //     console.log('still alive');
-                // }
-                // user = { email: response.authData.email, _id: response.authData._id }
-                // console.log("you can access variable user: ", user)
-                // if (window.location.pathname == '/') {
-                //     location.href = '/stockTracker';
-                // } else {
-                //     console.log('page: ', window.location.pathname);
-                // }
             },
             error: function (err) {
-                console.log('not login or token expired', err);
+                //makes sure to send the user back to home when token expires on page reload
+                console.log('ERROR: not logged in or token is expired', err);
                 if (window.performance) {
                     console.info("window.performance works fine on this browser");
                 }
@@ -270,31 +272,36 @@ function autoLogin() {
         })
     }
 }
+
+//calls method to verify the token is valid, if valid redirects to tracker page
 function verifyStockTracker() {
     if (localStorage.length > 0) {
-        // delete localStorage.jwtToken;
-        console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+        // deletes the client's localStorage.jwtToken
+        // console.log('This client's token is: ', localStorage.jwtToken);
         $.ajax({
             type: "POST",
             url: '/stockTracker',
+            //will post the token in the header to compare with client token
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
             },
             success: function (response) {
-                console.log('login or have token 2', response)
-                // user = { email: response.authData.email, _id: response.authData._id }
-                // console.log("you can access variable user: ", user)
+                // console.log('has valid token from login', response)
+                //upon token verification from backend, if successfull and current page is /
+                //then page will redirect to /stockTracker page
                 if (window.location.pathname == '/') {
                     location.href = '/stockTracker';
                 } else {
-                    console.log('page: ', window.location.pathname);
+                    // console.log('Your current page is: ', window.location.pathname);
                 }
             },
             error: function (err) {
-                console.log('not login or token expired', err);
+                //if the verification of token fails in backend, tell user in console:
+                console.log('not logged in or token is expired', err);
                 if (window.performance) {
                     console.info("window.performance works fine on this browser");
                 }
+                //and redirects back to homepage /
                 if (performance.navigation.type == 1) {
                     console.info("This page is reloaded");
                     location.href = '/';
@@ -305,6 +312,8 @@ function verifyStockTracker() {
         })
     }
 }
+
+//constantly checks the header against the client token
 function checkForLogin() {
     if (localStorage.length > 0) {
         $.ajax({
@@ -323,48 +332,15 @@ function checkForLogin() {
     }
 }
 
-// logout from stockTracker page back to landing page
-// $('#logOut').on('click', function (event) {
-//     event.preventDefault();
-//     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
-//     delete localStorage.jwtToken;
-//     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
-//     // checkForLogin();
-
-//     // I want to use token here
-//     // like remove the token or something
-//     // then not allow user to access /stockTracker page, which require login again
-//     // if (window.location.pathname == '/stockTracker') {
-//     //     location.href = `/`;
-//     // }
-// });
-
+//makes logout button functional
 $('#logOut').on('click', function (event) {
     event.preventDefault();
-    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
+    // console.log('Your token is: ', localStorage.jwtToken);
+    //deletes token from client's local storage
     delete localStorage.jwtToken;
-    console.log('localStorage.jwtToken: ', localStorage.jwtToken);
-    // checkForLogin();
-
-    // I want to use token here
-    // like remove the token or something
-    // then not allow user to access /stockTracker page, which require login again
+    // console.log('Your token is: ', localStorage.jwtToken);
+    //once token is deleted, send user back to home /
     if (window.location.pathname == '/stockTracker') {
         location.href = `/`;
     }
 });
-
-// postman ajax example
-// var settings = {
-//     "async": true,
-//     "crossDomain": true,
-//     // "url": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=CUGQ1VDKVRZ77B9U",
-//     "url": "https://api.iextrading.com/1.0/stock/aapl/chart/5y",
-//     "method": "GET",
-//     "headers": {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//     }
-// }
-// $.ajax(settings)
-// .done(function (response) {console.log(response);})
-// .fail(function (err) {console.log(err);})

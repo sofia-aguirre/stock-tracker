@@ -1,12 +1,13 @@
 // require express and other modules
 const express = require('express');
 const app = express();
+// jwt is secure way to store and transmit encrupted authentication data
 const jwt = require('jsonwebtoken');
+// bcrypt is use for encryption and decryption
 const bcrypt = require('bcrypt');
+// dotenv is use to make use of process.env
 const dotenv = require('dotenv').config();
-
-// parse incoming urlencoded form data
-// and populate the req.body object
+// parse incoming urlencoded form data and populate the req.body object
 const bodyParser = require('body-parser');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -22,10 +23,12 @@ app.use(function (req, res, next) {
 /************
  * DATABASE *
  ************/
+// require models folder will import everythings from index.js which index.js centralize other models
 const db = require('./models');
 
+// after login find user use server.js from DB by given email in ajax, save that user to this global variable
 // should set to null when logout / token expire, reset on login / signup
-var loggedInUserId;
+// var loggedInUserId;
 var loggedInUser;
 
 /**********
@@ -39,25 +42,23 @@ app.use(express.static('public'));
 /*
  * HTML Endpoints
  */
-app.get('/', function homepage(req, res) {
+// root, display landing page
+app.get('/', function (req, res) {
   res.sendFile(__dirname + '/views/landing.html');
-  // res.sendFile(__dirname + '/views/stockTracker.html');
 });
-
-app.get('/stockTracker', function homepage(req, res) {
+// display stockTracker page
+app.get('/stockTracker', function (req, res) {
   res.sendFile(__dirname + '/views/stockTracker.html');
-  // let verified = jwt.verify(req.token, 'pokemonsecretkey');
-  // if(verified){
-  //   res.sendFile(__dirname + '/views/stockTracker.html');
-  // }else{
-  //   res.redirect('/');
-  // }
 })
 
-app.post('/verify', verifyToken, (req, res) => {
-  // let verified = jwt.verify(req.token, 'pokemonsecretkey')
-  // console.log("verified: ", verified)
-  // res.json(verified)
+// when app.js need to check if localstorage token still alive EX: when page loaded, 
+// send ajax pre-request with given jwt token,
+// here we use jwt to encode given token to compare with browser header's encoded token.
+// send back updated token,
+// first use middleware to check for token store in header in the browser,
+// if no token or bad token send status 403 no access, else get the token, next,
+// this is like double verify, use jwt to verify the token
+app.post('/verify', verifyToken,function (req, res) {
   console.log(req.token)
   jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
     if(err) {
@@ -70,6 +71,10 @@ app.post('/verify', verifyToken, (req, res) => {
     }
   });
 });
+
+// after login found the user in DB with correct password and created a new token, 
+// do a nested ajax request to this route to check the token again, 
+// before launch from landing page to stockTracker page
 app.post('/stockTracker', verifyToken, (req, res) => {
   console.log(req.token)
   jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
@@ -77,7 +82,7 @@ app.post('/stockTracker', verifyToken, (req, res) => {
       res.sendStatus(403);
     } else {
       res.json({
-        message: 'Post created',
+        message: 'Post created  in stockTracker',
         authData: authData
       });
     }
@@ -87,7 +92,9 @@ app.post('/stockTracker', verifyToken, (req, res) => {
 /*
  * JSON API Endpoints
  */
-app.post('/signup', function signup(req, res) {
+// take ajax's new usr info, use bcrypt to hash the password, exclude the password, 
+// save to DB, create a token and send the token back to ajax.
+app.post('/signup', function (req, res) {
   var signupForm = req.body;
   var formEmail = signupForm.email;
   var formPassword = signupForm.password;
@@ -132,7 +139,10 @@ app.post('/signup', function signup(req, res) {
     }
   });
 });
-app.post('/login', function signup(req, res) {
+// use given user login data from ajax to find user in DB, 
+// reinclude the password in, compare given password to the storeed hash version, 
+// if match create a new token, send back to ajax.
+app.post('/login', function (req, res) {
   var loginForm = req.body;
   var formEmail = loginForm.email;
   var formPassword = loginForm.password;
@@ -146,11 +156,11 @@ app.post('/login', function signup(req, res) {
           res.json({ message: "Email/Password incorrect" });
         } else {
           console.log("foundUser id: ", foundUser[0]._id);
-          console.log("PASSAWORD1: ", formPassword)
+          console.log("form Password: ", formPassword)
           console.log("foundUser[0].password: ", foundUser[0].password)
           bcrypt.compare(formPassword, foundUser[0].password, function (err, match) {
             if (err) {
-              console.log(err);
+              console.log('error bcrypt: ',err);
               return res.status(500).json({ err, level: "bcrypt compare" });
             }
             if (match) {
@@ -173,7 +183,7 @@ app.post('/login', function signup(req, res) {
                 },
               );
               console.log("NEW TOKEN: ", token);
-              loggedInUserId = foundUser[0]._id;
+              // loggedInUserId = foundUser[0]._id;
               loggedInUser = foundUser[0];
               console.log("current User id: ", foundUser[0]._id);
               return res.status(200).json(
@@ -192,37 +202,9 @@ app.post('/login', function signup(req, res) {
       }
     );
 });
-app.post('/stockTracker', verifyToken, (req, res) => {
-  console.log(req.token)
-  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
-    if(err) {
-      res.sendStatus(403);
-    } else {
-      res.json({
-        message: 'Post created in stockTracker',
-        authData: authData
-      });
-    }
-  });
-});
-// when requet for route /verify,
-// first use middleware to check for token store in header in the browser,
-// if no token or bad token send status 403 no access, else get the token, next,
-// this is like double verify, use jwt to verify the token
-app.post('/verify', verifyToken, function (req, res) {
-  console.log(req.token)
-  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
-    if (err) {
-      res.sendStatus(403);
-    } else {
-      res.json({
-        message: 'Post created',
-        authData: authData
-      });
-    }
-  });
-});
 
+// this is a middleware to check for token store in header in the browser,
+// if no token or bad token send status 403 no access, else get the token, do next
 function verifyToken(req, res, next) {
   console.log("in verify...");
   // Get auth header value when we send our token, we want to send it in our header
@@ -236,10 +218,6 @@ function verifyToken(req, res, next) {
     // Set the token
     req.token = bearerToken;
     console.log('req.token', req.token);
-    // if verified then send to stocktracker
-    // app.get('/stockTracker', function homepage(req, res) {
-    //   res.sendFile(__dirname + '/views/stockTracker.html');
-    // })
     // Next middleware
     next();
   } else {
@@ -248,16 +226,16 @@ function verifyToken(req, res, next) {
   }
 }
 
-// do route GET, server get data from database and send back to ajax request
+// trade log, route GET, server get log data from database and send back to ajax request,
+// about the schema, each trade log will have a user's id as reference, 
+// that mean each user can have many trade logs and tagged on each log.
 app.get('/api/log', (req, res) => {
-  // db.Trade.find({ user: ['5b8d95118aaa70370b49e1c4'] })
-  console.log('loggedInUser._id: ', loggedInUser._id);
-  
+  console.log('this trade log belong to logged in user id: ', loggedInUser._id);
   db.Trade.find({ user: [loggedInUser._id] })
     .populate('user')
     .exec(function (err, foundTrades) {
-      if (err) { console.log(err); return; }
-      console.log('foundTrades with length: ', foundTrades.length);
+      if (err) { console.log('error trade log not found: ',err); return; }
+      console.log('number of trade log found: ', foundTrades.length);
       for (var i = 0; i < foundTrades.length; i++) {
         console.log(foundTrades[i]);
       }
@@ -265,9 +243,9 @@ app.get('/api/log', (req, res) => {
     });
 });
 
-// do route POST, server add new data to database and send back to ajax request
+// trade log, route POST, server add new log to database and send back to ajax request, 
+// app.js will call GET route to display again
 app.post('/api/log', (req, res) => {
-  console.log('req.body: ', req.body);
   var trade = new db.Trade({
     symbol: req.body.symbol,
     bought_or_sold: req.body.bought_or_sold,
@@ -275,16 +253,15 @@ app.post('/api/log', (req, res) => {
     trade_date: req.body.trade_date,
     tradedPrice: req.body.tradedPrice
   });
-  // db.User.findOne({ email: 'a@a.com' }, 
   db.User.findOne({ email: loggedInUser.email }, 
   function (err, foundUser) {
     if (foundUser != null) {
       trade.user.push(foundUser);
       trade.save(function (err, savedTrade) {
         if (err) {
-          console.log(err);
+          console.log('error saved log',err);
         }
-        console.log('saved ' + savedTrade);
+        console.log('success saved log' + savedTrade);
         res.json({ data: savedTrade });
       });
     } else {
@@ -293,9 +270,9 @@ app.post('/api/log', (req, res) => {
   });
 });
 
-//DELETE route
+// trade log, route DELETE, server delete clicked log from database and send back to ajax request,
+// app.js will call GET route to display again
 app.delete('/api/log/:id', function (req, res) {
-  // console.log('log delete', req.params);
   var logId = req.params.id;
   // find the index of the book we want to remove
   db.Trade.deleteOne(
