@@ -118,6 +118,21 @@ Heroku lessons learned:
 - must include [ mongoose.connect( process.env.MONGODB_URI || "mongodb://localhost/stock-tracker10",  { useMongoClient: true }); ] inside the models index.js
 - heroku only takes master branch
 - must include Procfile containing "web: node server.js" (replace server.js with wherever your project begins)
+- env variable needs to be implemented into heroku app
+
+19) 
+edited the user model to include a property for the user's image url
+- added a input field in the sign up form for the image url
+- edit the placeholder for the image in the html file to include an id to which add the source url
+- ajax + server req/res for the image url in database
+- use ajax to push image url into string literal and make the image source the user's url from database
+
+20) 
+- npm install dotenv module (for env)
+- touch new file ".env" in root directory
+- set up env file to include the token's secret key
+- git ignore .env file in order to hide from git along with other node modules
+- replace all instances of the secret key in the server.js file with the process.env.VARIABLENAME method
 
 
 ### extra

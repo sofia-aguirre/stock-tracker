@@ -2,7 +2,8 @@
 const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const dotenv = require('dotenv').config();
 
 // parse incoming urlencoded form data
 // and populate the req.body object
@@ -58,7 +59,7 @@ app.post('/verify', verifyToken, (req, res) => {
   // console.log("verified: ", verified)
   // res.json(verified)
   console.log(req.token)
-  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
     if(err) {
       res.sendStatus(403);
     } else {
@@ -71,7 +72,7 @@ app.post('/verify', verifyToken, (req, res) => {
 });
 app.post('/stockTracker', verifyToken, (req, res) => {
   console.log(req.token)
-  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
     if(err) {
       res.sendStatus(403);
     } else {
@@ -90,6 +91,7 @@ app.post('/signup', function signup(req, res) {
   var signupForm = req.body;
   var formEmail = signupForm.email;
   var formPassword = signupForm.password;
+  var formImageURL = signupForm.imageURL;
 
   db.User.find({ email: formEmail }, function (err, foundUser) {
     if (err) { res.json({ err }) }
@@ -107,14 +109,14 @@ app.post('/signup', function signup(req, res) {
           // we now have a successful hashed password
         } else {
           db.User.create(
-            { email: formEmail, password: hash },
+            { email: formEmail, password: hash, imageURL: formImageURL },
             { password: 0 },
             function (err, createdUser) {
               createdUser = createdUser[0]
               // create a json web token here, but we did not use for log in the use at the same time
               jwt.sign(
                 { createdUser },
-                "pokemonsecretkey",
+                process.env.SECRETKEY,
                 (err, signedJwt) => {
                   res.status(200).json({
                     message: 'User Created',
@@ -159,14 +161,15 @@ app.post('/login', function signup(req, res) {
                 {
                   // add some identifying information
                   email: foundUser[0].email,
-                  _id: foundUser[0]._id
+                  _id: foundUser[0]._id,
+                  imageURL: foundUser[0].imageURL
                 },
                 // add our super secret key (which should be hidden, not plaintext like this)
-                "pokemonsecretkey",
+                process.env.SECRETKEY,
                 // these are options, not necessary
                 {
                   // its good practice to have an expiration amount for jwt tokens.
-                  expiresIn: "30s"
+                  expiresIn: "24h"
                 },
               );
               console.log("NEW TOKEN: ", token);
@@ -191,7 +194,7 @@ app.post('/login', function signup(req, res) {
 });
 app.post('/stockTracker', verifyToken, (req, res) => {
   console.log(req.token)
-  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
     if(err) {
       res.sendStatus(403);
     } else {
@@ -208,7 +211,7 @@ app.post('/stockTracker', verifyToken, (req, res) => {
 // this is like double verify, use jwt to verify the token
 app.post('/verify', verifyToken, function (req, res) {
   console.log(req.token)
-  jwt.verify(req.token, 'pokemonsecretkey', (err, authData) => {
+  jwt.verify(req.token, process.env.SECRETKEY, (err, authData) => {
     if (err) {
       res.sendStatus(403);
     } else {
