@@ -8,7 +8,10 @@ var parsedFormDate;
 var parsedFormShare;
 var parsedFormTotalCost;
 var parsedFormBoughtOrSoldData;
+var parsedFormImageURL;
 var user;
+var totalBought = 0;
+var totalSold = 0;
 
 $(document).ready(function () {
 
@@ -19,6 +22,8 @@ $(document).ready(function () {
     /////////END OF TRADE FORM BUTTONS//////////
 
     // getStockTrackFromDB();
+
+    
 
     ///////LANDING BUTTONS////////
     // shows the signup form when either buttons are clicked
@@ -31,11 +36,12 @@ $(document).ready(function () {
             var signupSerialize = $('#signup-form').serializeArray();
             var emailSerialize = signupSerialize[0].value;
             var passwordSerialize = signupSerialize[1].value;
+            var imageURLSerialize = signupSerialize[2].value;
             // console.log(`HELLO ${emailSerialize}, your password is: ${passwordSerialize}`);
             $.ajax({
                 method: 'POST',
                 url: '/signup',
-                data: { email: emailSerialize, password: passwordSerialize },
+                data: { email: emailSerialize, password: passwordSerialize, imageURL: imageURLSerialize },
                 success: function (json) {
                     console.log('signed up status', json);
                     localStorage.jwtToken = json.signedJwt;
@@ -59,8 +65,10 @@ $(document).ready(function () {
             $.ajax({
                 method: 'POST',
                 url: '/login',
-                data: { email: emailSerialize, password: passwordSerialize },
+                data: { email: emailSerialize, password: passwordSerialize},
                 success: function (json) {
+                    // console.log('THIS IS AN IMAGE' + parsedFormImageURL)
+                    // $('#user-pic').attr('src', parsedFormImageURL);
                     console.log('json.userId: ', json.userId);
                     localStorage.jwtToken = json.token;
                     console.log('localStorage.jwtToken: ', localStorage.jwtToken);
@@ -94,6 +102,8 @@ function getStockTrackFromDB() {
         method: 'GET',
         url: '/api/log',
         success: function handleSuccess(json) {
+            totalBought = 0;
+            totalSold = 0;
             console.log('successfully load stock log: ', json);
             $('#divLog').empty();
             for (var i = 0; i < json.data.length; i++) {
@@ -108,6 +118,14 @@ function getStockTrackFromDB() {
                     `<p> Stock: ${curSymbol} -  ${curBought_or_sold} ${curNumShares} share(s) worth $${curTradedPrice} on ${curTrade_date} - Trade #:${curID}</p>
             <button id='btnDeleteLog' data-id=${curID}>Delete Log</button>`
                 );
+                if (curBought_or_sold === 'bought'){
+                    totalBought += parseFloat(curTradedPrice);
+                    $('#boughtTotal').text(`-$${(totalBought).toFixed(2)}`);
+                } else if (curBought_or_sold === 'sold') {
+                    totalSold += parseFloat(curTradedPrice);
+                    $('#soldTotal').text(`+$${(totalSold).toFixed(2)}`);
+                }
+                // console.log('THIS IS AN IMAGE' + parsedFormImageURL);
             }
         },
         error: function (e) {
@@ -212,14 +230,15 @@ function autoLogin() {
             },
             success: function (response) {
                 console.log('login or have token', response)
+                $('#imageURL').attr("src",response.authData.imageURL);
                 window.setInterval(function () {
                     if (Date.now() / 1000 - response.authData.exp > 0) {
-                        console.log('time is up localStorage.jwtToken:', localStorage.jwtToken);
+                        // console.log('time is up localStorage.jwtToken:', localStorage.jwtToken);
                         clearInterval();
                         delete localStorage.jwtToken;
                         location.href = '/';
                     } else {
-                        console.log('still alive localStorage.jwtToken: ',localStorage.jwtToken);
+                        // console.log('still alive localStorage.jwtToken: ',localStorage.jwtToken);
                     }
                 }, 1000);
                 
