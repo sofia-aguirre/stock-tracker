@@ -314,23 +314,23 @@ function verifyStockTracker() {
 }
 
 //constantly checks the header against the client token
-function checkForLogin() {
-    if (localStorage.length > 0) {
-        $.ajax({
-            type: "POST",
-            url: '/verify',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
-            },
-            success: function (response) {
-                console.log(response)
-            },
-            error: function (err) {
-                console.log(err);
-            }
-        });
-    }
-}
+// function checkForLogin() {
+//     if (localStorage.length > 0) {
+//         $.ajax({
+//             type: "POST",
+//             url: '/verify',
+//             beforeSend: function (xhr) {
+//                 xhr.setRequestHeader("Authorization", 'Bearer ' + localStorage.jwtToken);
+//             },
+//             success: function (response) {
+//                 console.log(response)
+//             },
+//             error: function (err) {
+//                 console.log(err);
+//             }
+//         });
+//     }
+// }
 
 //makes logout button functional
 $('#logOut').on('click', function (event) {
