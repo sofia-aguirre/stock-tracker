@@ -138,6 +138,12 @@ edited the user model to include a property for the user's image url
 - git ignore .env file in order to hide from git along with other node modules
 - replace all instances of the secret key in the server.js file with the process.env.VARIABLENAME method
 
+21) 
+Backend Refactoring
+- made controllers for functions
+- made config routes for repeating routes
+- made a smaller server.js by combining controllers and routing
+
 
 ### extra
 toggle button for buy/sell
